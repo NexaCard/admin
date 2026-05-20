@@ -374,6 +374,7 @@ export const adminAPI = {
   adjustUserWallet: (id: number, data: AdminAdjustWalletPayload) =>
     api.post(`/admin/users/${id}/wallet/adjust`, data),
   updateUser: (id: number, data: Partial<AdminUser>) => api.put(`/admin/users/${id}`, data),
+  unbindUserTelegram: (id: number) => api.delete(`/admin/users/${id}/oauth/telegram`),
   resetUser2FA: (id: number) => api.delete(`/admin/users/${id}/2fa`),
   batchUpdateUserStatus: (data: { user_ids: number[]; status: string }) => api.put('/admin/users/batch-status', data),
   getUserCouponUsages: (id: number, params?: Record<string, unknown>) => api.get(`/admin/users/${id}/coupon-usages`, { params }),

@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { adminAPI, type AdminWalletAccount, type AdminWalletTransaction } from '@/api/admin'
-import type { AdminUser, AdminOrder, AdminPayment, AdminMemberLevel } from '@/api/types'
+import type { AdminUser, AdminOrder, AdminPayment, AdminMemberLevel, AdminUserOAuthIdentity } from '@/api/types'
 import IdCell from '@/components/IdCell.vue'
 import { Copy } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import ListPagination from '@/components/ListPagination.vue'
 import type { AcceptableValue } from 'reka-ui'
 import { copyText } from '@/utils/clipboard'
+import { confirmAction } from '@/utils/confirm'
 import {
   orderStatusClass as orderStatusClassMap,
   orderStatusLabel as orderStatusLabelMap,
@@ -379,6 +380,9 @@ const oauthIdentities = computed(() => {
   const list = user.value?.oauth_identities
   return Array.isArray(list) ? list : []
 })
+const oauthUnbindingId = ref<number | null>(null)
+const oauthError = ref('')
+const oauthSuccess = ref('')
 
 const twofaEnabled = computed(() => Boolean(user.value?.totp_enabled_at))
 const twofaEnabledAt = computed(() => (user.value?.totp_enabled_at as string | undefined) || '')
@@ -410,6 +414,33 @@ const formatProviderLabel = (provider?: string) => {
   const normalized = provider.trim().toLowerCase()
   if (normalized === 'telegram') return 'Telegram'
   return normalized
+}
+
+const isTelegramIdentity = (identity: AdminUserOAuthIdentity) => {
+  return identity.provider?.trim().toLowerCase() === 'telegram'
+}
+
+const handleUnbindTelegram = async (identity: AdminUserOAuthIdentity) => {
+  if (!Number.isFinite(userId.value) || userId.value <= 0 || !isTelegramIdentity(identity)) return
+  const account = identity.username ? `@${identity.username}` : identity.provider_user_id || 'Telegram'
+  const confirmed = await confirmAction({
+    description: t('admin.userDetail.oauth.confirmUnbindTelegram', { account }),
+    confirmText: t('admin.userDetail.oauth.unbindTelegram'),
+    variant: 'destructive',
+  })
+  if (!confirmed) return
+  oauthError.value = ''
+  oauthSuccess.value = ''
+  oauthUnbindingId.value = identity.id
+  try {
+    await adminAPI.unbindUserTelegram(userId.value)
+    await fetchUser()
+    oauthSuccess.value = t('admin.userDetail.oauth.unbindSuccess')
+  } catch (err: any) {
+    oauthError.value = err?.message || t('admin.userDetail.oauth.unbindFailed')
+  } finally {
+    oauthUnbindingId.value = null
+  }
 }
 
 onMounted(() => {
@@ -581,6 +612,8 @@ watch(
           <div class="text-xs text-muted-foreground">{{ t('admin.userDetail.oauth.title') }}</div>
           <div class="text-sm text-muted-foreground">{{ t('admin.userDetail.oauth.subtitle') }}</div>
         </div>
+        <div v-if="oauthError" class="text-xs text-destructive">{{ oauthError }}</div>
+        <div v-if="oauthSuccess" class="text-xs text-emerald-600">{{ oauthSuccess }}</div>
         <div v-if="oauthIdentities.length === 0" class="text-sm text-muted-foreground">
           {{ t('admin.userDetail.oauth.empty') }}
         </div>
@@ -590,19 +623,31 @@ watch(
             :key="identity.id"
             class="rounded-lg border border-border bg-card px-4 py-3"
           >
-            <div class="flex items-center gap-3">
-              <img
-                v-if="identity.avatar_url"
-                :src="identity.avatar_url"
-                :alt="identity.username || identity.provider_user_id"
-                class="h-10 w-10 rounded-full border border-border object-cover"
-              />
-              <div class="min-w-0">
-                <div class="text-sm font-medium text-foreground">{{ formatProviderLabel(identity.provider) }}</div>
-                <div class="truncate text-xs text-muted-foreground">
-                  {{ identity.username ? `@${identity.username}` : identity.provider_user_id }}
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <img
+                  v-if="identity.avatar_url"
+                  :src="identity.avatar_url"
+                  :alt="identity.username || identity.provider_user_id"
+                  class="h-10 w-10 rounded-full border border-border object-cover"
+                />
+                <div class="min-w-0">
+                  <div class="text-sm font-medium text-foreground">{{ formatProviderLabel(identity.provider) }}</div>
+                  <div class="truncate text-xs text-muted-foreground">
+                    {{ identity.username ? `@${identity.username}` : identity.provider_user_id }}
+                  </div>
                 </div>
               </div>
+              <Button
+                v-if="isTelegramIdentity(identity)"
+                size="sm"
+                variant="destructive"
+                class="shrink-0 cursor-pointer"
+                :disabled="oauthUnbindingId === identity.id"
+                @click="handleUnbindTelegram(identity)"
+              >
+                {{ oauthUnbindingId === identity.id ? t('admin.userDetail.oauth.unbindingTelegram') : t('admin.userDetail.oauth.unbindTelegram') }}
+              </Button>
             </div>
             <div class="mt-3 space-y-1 text-xs text-muted-foreground">
               <div>{{ t('admin.userDetail.oauth.providerUserId') }}: <span class="font-mono text-foreground">{{ identity.provider_user_id || '-' }}</span></div>
