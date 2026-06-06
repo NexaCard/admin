@@ -5,57 +5,57 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 210 40% 98%;
+    --foreground: 222 54% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 54% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --popover-foreground: 222 54% 10%;
+    --primary: 199 96% 48%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 204 46% 93%;
+    --secondary-foreground: 218 48% 17%;
+    --muted: 204 46% 93%;
+    --muted-foreground: 218 16% 42%;
+    --accent: 174 72% 42%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
+    --border: 208 32% 86%;
+    --input: 208 32% 86%;
+    --ring: 199 96% 48%;
     --radius: 0.5rem;
-    --chart-1: 176 72% 34%;
-    --chart-2: 32 94% 52%;
-    --chart-3: 215 25% 40%;
-    --chart-4: 45 86% 58%;
-    --chart-5: 195 65% 42%;
+    --chart-1: 199 96% 48%;
+    --chart-2: 174 72% 42%;
+    --chart-3: 255 67% 64%;
+    --chart-4: 38 92% 52%;
+    --chart-5: 344 74% 56%;
   }
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 222 47% 5%;
+    --foreground: 204 45% 94%;
+    --card: 222 43% 8%;
+    --card-foreground: 204 45% 94%;
+    --popover: 222 43% 8%;
+    --popover-foreground: 204 45% 94%;
+    --primary: 198 100% 58%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 219 36% 14%;
+    --secondary-foreground: 204 45% 94%;
+    --muted: 219 36% 14%;
+    --muted-foreground: 211 19% 66%;
+    --accent: 172 83% 48%;
+    --accent-foreground: 222 47% 6%;
+    --destructive: 0 72% 52%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 176 72% 40%;
-    --chart-2: 32 94% 52%;
-    --chart-3: 195 65% 42%;
-    --chart-4: 45 86% 58%;
-    --chart-5: 215 25% 40%;
+    --border: 215 34% 18%;
+    --input: 215 34% 18%;
+    --ring: 198 100% 58%;
+    --chart-1: 198 100% 58%;
+    --chart-2: 172 83% 48%;
+    --chart-3: 255 70% 70%;
+    --chart-4: 38 96% 58%;
+    --chart-5: 344 78% 62%;
   }
 }
 
@@ -97,6 +97,64 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    font-family: Aptos, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    text-rendering: geometricPrecision;
+  }
+}
+
+@layer components {
+  .nexa-shell {
+    background:
+      radial-gradient(circle at top left, hsl(198 100% 58% / 0.16), transparent 34rem),
+      radial-gradient(circle at 82% 10%, hsl(172 83% 48% / 0.12), transparent 28rem),
+      linear-gradient(135deg, hsl(var(--background)), hsl(var(--background)));
+  }
+
+  .nexa-surface {
+    @apply border border-border bg-card/90 shadow-sm backdrop-blur;
+    box-shadow: 0 18px 60px hsl(222 47% 5% / 0.08);
+  }
+
+  .dark .nexa-surface {
+    background: linear-gradient(180deg, hsl(222 43% 10% / 0.92), hsl(222 43% 8% / 0.92));
+    box-shadow: 0 24px 80px hsl(198 100% 58% / 0.08);
+  }
+
+  .nexa-sidebar {
+    background:
+      linear-gradient(180deg, hsl(222 47% 7% / 0.96), hsl(222 47% 4% / 0.98)),
+      radial-gradient(circle at 20% 0%, hsl(198 100% 58% / 0.18), transparent 20rem);
+    color: hsl(204 45% 94%);
+  }
+
+  .nexa-brand-mark {
+    @apply inline-flex items-center justify-center rounded-lg font-semibold;
+    background: linear-gradient(135deg, hsl(198 100% 58%), hsl(172 83% 48%));
+    color: hsl(222 47% 5%);
+    box-shadow: 0 0 30px hsl(198 100% 58% / 0.28);
+  }
+
+  .nexa-grid {
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.045) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .nexa-kpi-card {
+    @apply relative overflow-hidden rounded-lg border border-border bg-card/90 shadow-sm;
+  }
+
+  .nexa-kpi-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, hsl(198 100% 58% / 0.12), transparent 44%, hsl(172 83% 48% / 0.10));
+    opacity: 0.72;
+    pointer-events: none;
+  }
+
+  .nexa-kpi-card > * {
+    position: relative;
   }
 }

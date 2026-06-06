@@ -715,24 +715,26 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background text-foreground">
+  <div class="nexa-shell min-h-screen text-foreground">
     <div class="flex min-h-screen">
       <!-- Desktop sidebar -->
       <aside
-        class="hidden md:flex border-r border-border bg-card flex-col sticky top-0 h-screen overflow-y-auto transition-all duration-300"
+        class="nexa-sidebar hidden md:flex border-r border-white/10 flex-col sticky top-0 h-screen overflow-y-auto transition-all duration-300"
         :class="sidebarCollapsed ? 'w-16' : 'w-64'"
       >
-        <div class="py-6" :class="sidebarCollapsed ? 'px-2' : 'px-6'">
-          <div v-if="!sidebarCollapsed" class="text-xl font-semibold tracking-tight">
-            {{ t('admin.brand') }}
+        <div class="py-5" :class="sidebarCollapsed ? 'px-2' : 'px-4'">
+          <div class="flex items-center gap-3">
+            <div class="nexa-brand-mark h-10 w-10 shrink-0 text-sm">NX</div>
+            <div v-if="!sidebarCollapsed" class="min-w-0">
+              <div class="text-lg font-semibold tracking-tight text-white">NexaCard</div>
+              <div class="mt-0.5 text-[11px] uppercase tracking-[0.18em] text-cyan-100/55">{{ t('admin.layout.controlRoom') }}</div>
+            </div>
           </div>
-          <div v-if="!sidebarCollapsed" class="text-xs text-muted-foreground mt-1">{{ t('admin.layout.controlRoom') }}</div>
-          <div v-if="sidebarCollapsed" class="text-lg font-semibold tracking-tight text-center">D&J</div>
         </div>
         <div v-if="!sidebarCollapsed" class="px-3 pb-2">
           <Input
             v-model="navSearch"
-            class="h-8 text-xs"
+            class="h-9 border-white/10 bg-white/5 text-xs text-white placeholder:text-cyan-100/40 focus-visible:ring-cyan-300"
             :placeholder="t('admin.navSearch.placeholder')"
           />
         </div>
@@ -743,7 +745,7 @@ onBeforeUnmount(() => {
               v-if="showDashboardNav"
               to="/"
               class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors"
-              :class="isItemActive('/') ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70'"
+              :class="isItemActive('/') ? 'bg-cyan-400/15 text-cyan-100 ring-1 ring-cyan-300/20' : 'text-cyan-100/62 hover:bg-white/7 hover:text-white'"
             >
               <LayoutDashboard class="h-4 w-4 shrink-0" />
               <span>{{ dashboardNavLabel }}</span>
@@ -758,7 +760,7 @@ onBeforeUnmount(() => {
               <button
                 type="button"
                 class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-secondary/70"
-                :class="isGroupExpanded(group.id) ? 'bg-secondary/40 text-foreground' : 'text-foreground'"
+                :class="isGroupExpanded(group.id) ? 'bg-white/8 text-white' : 'text-cyan-100/78 hover:bg-white/7 hover:text-white'"
                 @click="toggleGroup(group.id)"
               >
                 <div class="flex min-w-0 items-center gap-3">
@@ -767,16 +769,16 @@ onBeforeUnmount(() => {
                 </div>
                 <component
                   :is="isGroupExpanded(group.id) ? ChevronDown : ChevronRight"
-                  class="h-4 w-4 shrink-0 text-muted-foreground"
+                  class="h-4 w-4 shrink-0 text-cyan-100/45"
                 />
               </button>
-              <div v-show="isGroupExpanded(group.id)" class="space-y-1 pl-9">
+              <div v-show="isGroupExpanded(group.id)" class="space-y-1 border-l border-white/10 ml-5 pl-4">
                 <RouterLink
                   v-for="item in group.items"
                   :key="`${group.id}-${item.to}`"
                   :to="item.to"
                   class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors"
-                  :class="isItemActive(item.to) ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground'"
+                  :class="isItemActive(item.to) ? 'bg-cyan-400/15 text-cyan-100 ring-1 ring-cyan-300/20' : 'text-cyan-100/58 hover:bg-white/7 hover:text-white'"
                 >
                   <component v-if="item.icon" :is="item.icon" class="h-3.5 w-3.5 shrink-0" />
                   <span class="truncate">{{ item.label }}</span>
@@ -789,19 +791,19 @@ onBeforeUnmount(() => {
             <RouterLink
               to="/"
               class="flex items-center justify-center rounded-lg p-2 transition-colors"
-              :class="isItemActive('/') ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70'"
+              :class="isItemActive('/') ? 'bg-cyan-400/15 text-cyan-100 ring-1 ring-cyan-300/20' : 'text-cyan-100/62 hover:text-white hover:bg-white/7'"
               :title="dashboardNavLabel"
             >
               <LayoutDashboard class="h-4 w-4 shrink-0" />
             </RouterLink>
             <template v-for="group in navGroups" :key="`collapsed-${group.id}`">
-              <div class="my-1 border-t border-border/50" />
+              <div class="my-1 border-t border-white/10" />
               <RouterLink
                 v-for="item in group.items"
                 :key="`collapsed-${group.id}-${item.to}`"
                 :to="item.to"
                 class="flex items-center justify-center rounded-lg p-2 transition-colors"
-                :class="isItemActive(item.to) ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70'"
+                :class="isItemActive(item.to) ? 'bg-cyan-400/15 text-cyan-100 ring-1 ring-cyan-300/20' : 'text-cyan-100/62 hover:text-white hover:bg-white/7'"
                 :title="item.label"
               >
                 <component v-if="item.icon" :is="item.icon" class="h-4 w-4 shrink-0" />
@@ -810,14 +812,14 @@ onBeforeUnmount(() => {
           </template>
         </nav>
         <!-- Collapse toggle button -->
-        <div class="border-t border-border">
-          <div v-if="!sidebarCollapsed" class="px-6 py-3 text-[11px] text-muted-foreground space-y-1">
-            <p>© {{ new Date().getFullYear() }} Dujiao-Next <span v-if="appVersion" class="text-muted-foreground/70">{{ appVersion }}</span></p>
+        <div class="border-t border-white/10">
+          <div v-if="!sidebarCollapsed" class="px-5 py-3 text-[11px] text-cyan-100/45 space-y-1">
+            <p>© {{ new Date().getFullYear() }} NexaCard <span v-if="appVersion" class="text-cyan-100/35">{{ appVersion }}</span></p>
             <a
               href="https://github.com/dujiao-next"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1 underline-offset-2 hover:underline"
+              class="inline-flex items-center gap-1 underline-offset-2 hover:text-cyan-100 hover:underline"
             >
               <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 .5C5.648.5.5 5.648.5 12c0 5.084 3.292 9.4 7.86 10.922.575.106.784-.25.784-.556 0-.273-.01-1-.016-1.962-3.197.694-3.872-1.54-3.872-1.54-.522-1.326-1.274-1.678-1.274-1.678-1.042-.713.079-.699.079-.699 1.152.081 1.758 1.183 1.758 1.183 1.024 1.755 2.688 1.248 3.343.954.104-.742.401-1.248.73-1.535-2.552-.29-5.236-1.276-5.236-5.678 0-1.254.448-2.28 1.182-3.084-.118-.29-.512-1.457.112-3.04 0 0 .964-.308 3.158 1.178a10.98 10.98 0 0 1 2.876-.387c.976.004 1.96.132 2.878.387 2.192-1.486 3.154-1.178 3.154-1.178.626 1.583.232 2.75.114 3.04.736.804 1.18 1.83 1.18 3.084 0 4.413-2.688 5.384-5.248 5.668.412.354.78 1.052.78 2.12 0 1.53-.014 2.764-.014 3.14 0 .31.206.668.79.554C20.212 21.396 23.5 17.083 23.5 12 23.5 5.648 18.352.5 12 .5Z" />
@@ -827,7 +829,7 @@ onBeforeUnmount(() => {
           </div>
           <button
             type="button"
-            class="flex w-full items-center justify-center py-3 text-muted-foreground hover:text-foreground hover:bg-secondary/70 transition-colors"
+            class="flex w-full items-center justify-center py-3 text-cyan-100/55 hover:text-white hover:bg-white/7 transition-colors"
             @click="toggleSidebar"
             :title="sidebarCollapsed ? t('admin.layout.expandSidebar') : t('admin.layout.collapseSidebar')"
           >
@@ -839,18 +841,21 @@ onBeforeUnmount(() => {
 
       <!-- Mobile sidebar (Sheet) -->
       <Sheet v-model:open="mobileNavOpen">
-        <SheetContent side="left" class="w-72 p-0 flex flex-col">
+        <SheetContent side="left" class="nexa-sidebar w-72 p-0 flex flex-col border-white/10 text-white">
           <SheetTitle class="sr-only">{{ t('admin.layout.navigation') }}</SheetTitle>
-          <div class="px-6 py-6">
-            <div class="text-xl font-semibold tracking-tight">
-              {{ t('admin.brand') }}
+          <div class="px-5 py-6">
+            <div class="flex items-center gap-3">
+              <div class="nexa-brand-mark h-10 w-10 text-sm">NX</div>
+              <div>
+                <div class="text-xl font-semibold tracking-tight">NexaCard</div>
+                <div class="text-xs text-cyan-100/50 mt-1">{{ t('admin.layout.controlRoom') }}</div>
+              </div>
             </div>
-            <div class="text-xs text-muted-foreground mt-1">{{ t('admin.layout.controlRoom') }}</div>
           </div>
           <div class="px-3 pb-2">
             <Input
               v-model="navSearch"
-              class="h-8 text-xs"
+              class="h-9 border-white/10 bg-white/5 text-xs text-white placeholder:text-cyan-100/40 focus-visible:ring-cyan-300"
               :placeholder="t('admin.navSearch.placeholder')"
             />
           </div>
@@ -859,7 +864,7 @@ onBeforeUnmount(() => {
               v-if="showDashboardNav"
               to="/"
               class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors"
-              :class="isItemActive('/') ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70'"
+              :class="isItemActive('/') ? 'bg-cyan-400/15 text-cyan-100 ring-1 ring-cyan-300/20' : 'text-cyan-100/62 hover:bg-white/7 hover:text-white'"
             >
               <LayoutDashboard class="h-4 w-4 shrink-0" />
               <span>{{ dashboardNavLabel }}</span>
@@ -874,7 +879,7 @@ onBeforeUnmount(() => {
               <button
                 type="button"
                 class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-secondary/70"
-                :class="isGroupExpanded(group.id) ? 'bg-secondary/40 text-foreground' : 'text-foreground'"
+                :class="isGroupExpanded(group.id) ? 'bg-white/8 text-white' : 'text-cyan-100/78 hover:bg-white/7 hover:text-white'"
                 @click="toggleGroup(group.id)"
               >
                 <div class="flex min-w-0 items-center gap-3">
@@ -883,16 +888,16 @@ onBeforeUnmount(() => {
                 </div>
                 <component
                   :is="isGroupExpanded(group.id) ? ChevronDown : ChevronRight"
-                  class="h-4 w-4 shrink-0 text-muted-foreground"
+                  class="h-4 w-4 shrink-0 text-cyan-100/45"
                 />
               </button>
-              <div v-show="isGroupExpanded(group.id)" class="space-y-1 pl-9">
+              <div v-show="isGroupExpanded(group.id)" class="space-y-1 border-l border-white/10 ml-5 pl-4">
                 <RouterLink
                   v-for="item in group.items"
                   :key="`mobile-${group.id}-${item.to}`"
                   :to="item.to"
                   class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors"
-                  :class="isItemActive(item.to) ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground'"
+                  :class="isItemActive(item.to) ? 'bg-cyan-400/15 text-cyan-100 ring-1 ring-cyan-300/20' : 'text-cyan-100/58 hover:bg-white/7 hover:text-white'"
                 >
                   <component v-if="item.icon" :is="item.icon" class="h-3.5 w-3.5 shrink-0" />
                   <span class="truncate">{{ item.label }}</span>
@@ -900,14 +905,14 @@ onBeforeUnmount(() => {
               </div>
             </div>
           </nav>
-          <div class="px-6 py-4 border-t border-border text-[11px] text-muted-foreground space-y-1">
-            <p>© {{ new Date().getFullYear() }} Dujiao-Next <span v-if="appVersion" class="text-muted-foreground/70">{{ appVersion }}</span></p>
+          <div class="px-6 py-4 border-t border-white/10 text-[11px] text-cyan-100/45 space-y-1">
+            <p>© {{ new Date().getFullYear() }} NexaCard <span v-if="appVersion" class="text-cyan-100/35">{{ appVersion }}</span></p>
           </div>
         </SheetContent>
       </Sheet>
 
       <div class="flex-1 flex flex-col min-w-0">
-        <header class="flex items-center justify-between border-b border-border bg-background px-4 md:px-8 py-3 md:py-4 gap-2">
+        <header class="sticky top-0 z-20 flex items-center justify-between border-b border-border/70 bg-background/82 px-4 py-3 backdrop-blur-xl md:px-8 md:py-4 gap-2">
           <div class="flex items-center gap-3">
             <Button size="icon-sm" variant="ghost" class="md:hidden" @click="mobileNavOpen = true">
               <Menu class="h-5 w-5" />
@@ -922,7 +927,10 @@ onBeforeUnmount(() => {
               <ChevronsRight v-if="sidebarCollapsed" class="h-4 w-4" />
               <ChevronsLeft v-else class="h-4 w-4" />
             </Button>
-            <div class="text-sm text-muted-foreground hidden sm:block">{{ t('admin.layout.workspace') }}</div>
+            <div class="hidden sm:block">
+              <div class="text-sm font-medium">{{ t('admin.layout.workspace') }}</div>
+              <div class="text-[11px] text-muted-foreground">NexaCard operations cockpit</div>
+            </div>
           </div>
           <div class="flex items-center gap-2">
             <Select
@@ -957,8 +965,8 @@ onBeforeUnmount(() => {
             </Button>
           </div>
         </header>
-        <main class="min-w-0 flex-1 overflow-x-hidden px-4 py-4 md:px-8 md:py-6">
-          <div class="min-w-0">
+        <main class="nexa-grid min-w-0 flex-1 overflow-x-hidden px-4 py-4 md:px-8 md:py-6">
+          <div class="min-w-0 mx-auto w-full max-w-[1680px]">
             <RouterView />
           </div>
         </main>
