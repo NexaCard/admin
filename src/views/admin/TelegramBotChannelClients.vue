@@ -51,7 +51,7 @@ const showCreateDialog = ref(false)
 const creating = ref(false)
 const revealedSecretIds = ref<number[]>([])
 const revealTimeoutMs = 30000
-const revealTimers = new Map<number, ReturnType<typeof window.setTimeout>>()
+const revealTimers = new Map<number, number>()
 
 // Edit dialog
 const showEditDialog = ref(false)

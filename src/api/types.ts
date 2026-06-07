@@ -423,6 +423,7 @@ export interface AdminPaymentChannel {
   payment_roles?: string[]
   member_levels?: number[]
   config_json: Record<string, unknown>
+  config_secrets?: Record<string, boolean>
   icon: string
   is_active: boolean
   sort_order: number

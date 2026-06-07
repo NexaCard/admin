@@ -73,7 +73,7 @@ const showEditModal = ref(false)
 const editingCardSecret = ref<AdminCardSecret | null>(null)
 const revealedSecretIds = ref<number[]>([])
 const revealTimeoutMs = 30000
-const revealTimers = new Map<number, ReturnType<typeof window.setTimeout>>()
+const revealTimers = new Map<number, number>()
 
 const normalizeFilterValue = (value: string) => (value === '__all__' ? '' : value)
 
