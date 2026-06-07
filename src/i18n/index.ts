@@ -661,9 +661,12 @@ const messages = {
         empty: '未找到匹配的菜单项',
       },
       dashboard: {
+        eyebrow: 'NexaCard 运营舱',
         title: '运营仪表盘',
         subtitle: '聚合订单、支付、库存与用户核心指标',
         period: '统计周期',
+        loadingSnapshot: '同步中',
+        liveSnapshot: '实时快照',
         filters: {
           range: '时间范围',
           from: '开始日期',
@@ -683,6 +686,7 @@ const messages = {
           paidOrders: '已支付订单',
           gmvPaid: '支付金额',
           paymentSuccessRate: '支付成功率',
+          completedOrders: '已完成订单',
           pendingOrders: '待支付订单',
           processingOrders: '处理中订单',
           newUsers: '新增用户',
@@ -699,6 +703,17 @@ const messages = {
           totalCost: '总成本',
           totalProfit: '总利润',
           profitMargin: '利润率',
+        },
+        hero: {
+          paymentsHealth: '支付链路健康度',
+          marginHealth: '利润结构稳定性',
+          inventoryHealth: '库存风险雷达',
+        },
+        sections: {
+          performance: '经营趋势',
+          performanceHint: '订单、支付与利润按日期聚合展示',
+          funnelHint: '从订单创建到完成的关键转化路径',
+          riskHint: '当前需要关注 {count} 个风险信号',
         },
         trends: {
           orderTitle: '订单趋势',
@@ -752,6 +767,12 @@ const messages = {
         },
         quickActions: {
           title: '快捷入口',
+          subtitle: '直达高频运营页面',
+          ordersDesc: '处理订单状态与交付',
+          paymentsDesc: '核对支付流水与回调',
+          productsDesc: '维护商品、SKU 与库存',
+          cardSecretsDesc: '管理自动交付卡密',
+          usersDesc: '查看用户资产与行为',
         },
         ad: {
           label: '广告',
@@ -4162,9 +4183,12 @@ const messages = {
         empty: '找不到符合的選單項目',
       },
       dashboard: {
+        eyebrow: 'NexaCard 營運艙',
         title: '營運儀表板',
         subtitle: '聚合訂單、支付、庫存與用戶核心指標',
         period: '統計週期',
+        loadingSnapshot: '同步中',
+        liveSnapshot: '即時快照',
         filters: {
           range: '時間範圍',
           from: '開始日期',
@@ -4184,6 +4208,7 @@ const messages = {
           paidOrders: '已支付訂單',
           gmvPaid: '支付金額',
           paymentSuccessRate: '支付成功率',
+          completedOrders: '已完成訂單',
           pendingOrders: '待支付訂單',
           processingOrders: '處理中訂單',
           newUsers: '新增用戶',
@@ -4200,6 +4225,17 @@ const messages = {
           totalCost: '總成本',
           totalProfit: '總利潤',
           profitMargin: '利潤率',
+        },
+        hero: {
+          paymentsHealth: '支付鏈路健康度',
+          marginHealth: '利潤結構穩定性',
+          inventoryHealth: '庫存風險雷達',
+        },
+        sections: {
+          performance: '經營趨勢',
+          performanceHint: '訂單、支付與利潤按日期聚合展示',
+          funnelHint: '從訂單建立到完成的關鍵轉化路徑',
+          riskHint: '目前需要關注 {count} 個風險信號',
         },
         trends: {
           orderTitle: '訂單趨勢',
@@ -4253,6 +4289,12 @@ const messages = {
         },
         quickActions: {
           title: '快捷入口',
+          subtitle: '直達高頻營運頁面',
+          ordersDesc: '處理訂單狀態與交付',
+          paymentsDesc: '核對支付流水與回調',
+          productsDesc: '維護商品、SKU 與庫存',
+          cardSecretsDesc: '管理自動交付卡密',
+          usersDesc: '查看用戶資產與行為',
         },
         ad: {
           label: '廣告',
@@ -7663,9 +7705,12 @@ const messages = {
         empty: 'No matching menu items',
       },
       dashboard: {
+        eyebrow: 'NexaCard Ops Bay',
         title: 'Operations Dashboard',
         subtitle: 'Key metrics across orders, payments, stock, and users',
         period: 'Period',
+        loadingSnapshot: 'Syncing',
+        liveSnapshot: 'Live snapshot',
         filters: {
           range: 'Time Range',
           from: 'From Date',
@@ -7685,6 +7730,7 @@ const messages = {
           paidOrders: 'Paid Orders',
           gmvPaid: 'Paid GMV',
           paymentSuccessRate: 'Payment Success Rate',
+          completedOrders: 'Completed Orders',
           pendingOrders: 'Pending Payment Orders',
           processingOrders: 'Processing Orders',
           newUsers: 'New Users',
@@ -7701,6 +7747,17 @@ const messages = {
           totalCost: 'Total Cost',
           totalProfit: 'Total Profit',
           profitMargin: 'Profit Margin',
+        },
+        hero: {
+          paymentsHealth: 'Payment rail health',
+          marginHealth: 'Margin stability',
+          inventoryHealth: 'Inventory risk radar',
+        },
+        sections: {
+          performance: 'Business Performance',
+          performanceHint: 'Orders, payments, and profit grouped by date',
+          funnelHint: 'Key conversion path from order creation to completion',
+          riskHint: '{count} risk signals need attention',
         },
         trends: {
           orderTitle: 'Order Trend',
@@ -7754,6 +7811,12 @@ const messages = {
         },
         quickActions: {
           title: 'Quick Actions',
+          subtitle: 'Jump into frequent operations',
+          ordersDesc: 'Handle order state and fulfillment',
+          paymentsDesc: 'Review payment records and callbacks',
+          productsDesc: 'Maintain products, SKUs, and stock',
+          cardSecretsDesc: 'Manage auto-fulfillment secrets',
+          usersDesc: 'Inspect user assets and activity',
         },
         ad: {
           label: 'Ad',

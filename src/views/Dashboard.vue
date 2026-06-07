@@ -1,6 +1,24 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  BarChart3,
+  Boxes,
+  ChevronRight,
+  CircleDollarSign,
+  CreditCard,
+  Gauge,
+  KeyRound,
+  Package,
+  RefreshCw,
+  ShoppingBag,
+  TrendingUp,
+  Users,
+  Wallet,
+  Zap,
+} from 'lucide-vue-next'
 import { adminAPI } from '@/api/admin'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -114,9 +132,6 @@ interface DashboardRankings {
 
 const { t, locale } = useI18n()
 
-const rankingSkuLabel = (item: DashboardProductRanking) =>
-  formatSkuDisplayLabel({ sku_code: item.sku_code, spec_values: item.sku_spec_values }, locale.value)
-
 const loadingOverview = ref(false)
 const loadingTrends = ref(false)
 const loadingRankings = ref(false)
@@ -141,8 +156,13 @@ const rangeOptions = computed(() => [
 ])
 
 const isCustomRange = computed(() => filters.range === 'custom')
-
+const isDashboardLoading = computed(() => loadingOverview.value || loadingTrends.value || loadingRankings.value || loadingInventoryAlerts.value)
 const trendPoints = computed(() => trends.value?.points || [])
+
+const rankingSkuLabel = (item: DashboardProductRanking) =>
+  formatSkuDisplayLabel({ sku_code: item.sku_code, spec_values: item.sku_spec_values }, locale.value)
+
+const asPercent = (value?: string | number) => `${value ?? '0.00'}%`
 
 const maxOrderTrend = computed(() => {
   let maxValue = 1
@@ -319,9 +339,9 @@ const refreshDashboard = () => {
 }
 
 const alertClass = (level: string) => {
-  if (level === 'error') return 'border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300'
-  if (level === 'warning') return 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300'
-  return 'border-border bg-muted/40 text-foreground'
+  if (level === 'error') return 'nexa-alert-row-danger'
+  if (level === 'warning') return 'nexa-alert-row-warning'
+  return 'nexa-alert-row-neutral'
 }
 
 const alertLabel = (type: string) => {
@@ -347,18 +367,135 @@ const skuSpecLabel = (item: AdminDashboardInventoryAlert) => {
   return Object.values(item.sku_spec_values).join(' / ')
 }
 
-const quickActions = computed(() => [
-  { label: t('admin.nav.orders'), path: '/orders' },
-  { label: t('admin.nav.payments'), path: '/payments' },
-  { label: t('admin.nav.products'), path: '/products' },
-  { label: t('admin.nav.cardSecrets'), path: '/card-secrets' },
-  { label: t('admin.nav.users'), path: '/users' },
-])
-
 const channelLabel = (item: DashboardChannelRanking) => {
   if (item.channel_name) return item.channel_name
   return `${item.provider_type || '-'} / ${item.channel_type || '-'}`
 }
+
+const heroStats = computed(() => [
+  {
+    label: t('admin.dashboard.kpi.paymentSuccessRate'),
+    value: asPercent(overview.value?.kpi.payment_success_rate),
+    helper: t('admin.dashboard.hero.paymentsHealth'),
+    tone: 'success',
+  },
+  {
+    label: t('admin.dashboard.kpi.profitMargin'),
+    value: asPercent(overview.value?.kpi.profit_margin),
+    helper: t('admin.dashboard.hero.marginHealth'),
+    tone: 'primary',
+  },
+  {
+    label: t('admin.dashboard.kpi.lowStockProducts'),
+    value: overview.value?.kpi.low_stock_products ?? 0,
+    helper: t('admin.dashboard.hero.inventoryHealth'),
+    tone: (overview.value?.kpi.low_stock_products || 0) > 0 ? 'warning' : 'muted',
+  },
+])
+
+const primaryMetrics = computed(() => [
+  {
+    label: t('admin.dashboard.kpi.gmvPaid'),
+    value: formatMoney(overview.value?.kpi.gmv_paid, overview.value?.currency),
+    helper: `${t('admin.dashboard.kpi.paidOrders')}: ${overview.value?.kpi.paid_orders ?? 0}`,
+    icon: CircleDollarSign,
+    tone: 'primary',
+  },
+  {
+    label: t('admin.dashboard.kpi.totalProfit'),
+    value: formatMoney(overview.value?.kpi.total_profit, overview.value?.currency),
+    helper: `${t('admin.dashboard.kpi.totalCost')}: ${formatMoney(overview.value?.kpi.total_cost, overview.value?.currency)}`,
+    icon: TrendingUp,
+    tone: 'success',
+  },
+  {
+    label: t('admin.dashboard.kpi.ordersTotal'),
+    value: overview.value?.kpi.orders_total ?? 0,
+    helper: `${t('admin.dashboard.kpi.completedOrders')}: ${overview.value?.kpi.completed_orders ?? 0}`,
+    icon: ShoppingBag,
+    tone: 'info',
+  },
+  {
+    label: t('admin.dashboard.kpi.totalUserBalance'),
+    value: formatMoney(overview.value?.kpi.total_user_balance, overview.value?.currency),
+    helper: `${t('admin.dashboard.kpi.newUsers')}: ${overview.value?.kpi.new_users ?? 0}`,
+    icon: Wallet,
+    tone: 'violet',
+  },
+])
+
+const operationMetrics = computed(() => [
+  {
+    label: t('admin.dashboard.kpi.pendingOrders'),
+    value: overview.value?.kpi.pending_payment_orders ?? 0,
+    helper: `${t('admin.dashboard.kpi.processingOrders')}: ${overview.value?.kpi.processing_orders ?? 0}`,
+    icon: Gauge,
+    tone: 'warning',
+  },
+  {
+    label: t('admin.dashboard.kpi.activeProducts'),
+    value: overview.value?.kpi.active_products ?? 0,
+    helper: `${t('admin.dashboard.kpi.outOfStockProducts')}: ${overview.value?.kpi.out_of_stock_products ?? 0}`,
+    icon: Package,
+    tone: 'info',
+  },
+  {
+    label: t('admin.dashboard.kpi.autoAvailableSecrets'),
+    value: overview.value?.kpi.auto_available_secrets ?? 0,
+    helper: `${t('admin.dashboard.kpi.manualAvailableUnits')}: ${overview.value?.kpi.manual_available_units ?? 0}`,
+    icon: KeyRound,
+    tone: 'success',
+  },
+  {
+    label: t('admin.dashboard.kpi.paymentsSuccess'),
+    value: overview.value?.kpi.payments_success ?? 0,
+    helper: `${t('admin.dashboard.kpi.paymentsFailed')}: ${overview.value?.kpi.payments_failed ?? 0}`,
+    icon: CreditCard,
+    tone: 'primary',
+  },
+])
+
+const generalAlerts = computed(() =>
+  (overview.value?.alerts || []).filter((alert) => alert.type !== 'out_of_stock_products' && alert.type !== 'low_stock_products'),
+)
+
+const riskCount = computed(() => {
+  const alertTotal = (overview.value?.alerts || []).reduce((sum, item) => sum + Number(item.value || 0), 0)
+  return alertTotal + inventoryAlerts.value.length
+})
+
+const quickActions = computed(() => [
+  {
+    label: t('admin.navItems.orderList'),
+    description: t('admin.dashboard.quickActions.ordersDesc'),
+    path: '/orders',
+    icon: ShoppingBag,
+  },
+  {
+    label: t('admin.navItems.payments'),
+    description: t('admin.dashboard.quickActions.paymentsDesc'),
+    path: '/payments',
+    icon: CreditCard,
+  },
+  {
+    label: t('admin.navItems.productList'),
+    description: t('admin.dashboard.quickActions.productsDesc'),
+    path: '/products',
+    icon: Boxes,
+  },
+  {
+    label: t('admin.navItems.cardSecrets'),
+    description: t('admin.dashboard.quickActions.cardSecretsDesc'),
+    path: '/card-secrets',
+    icon: KeyRound,
+  },
+  {
+    label: t('admin.navItems.userList'),
+    description: t('admin.dashboard.quickActions.usersDesc'),
+    path: '/users',
+    icon: Users,
+  },
+])
 
 onMounted(() => {
   loadDashboard()
@@ -366,32 +503,44 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-5">
-    <div class="nexa-surface overflow-hidden rounded-lg">
-      <div class="relative flex flex-col gap-5 p-5 xl:flex-row xl:items-end xl:justify-between">
-        <div class="relative">
-          <div class="mb-2 inline-flex items-center rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-primary">
-            NexaCard Command
+  <div class="dashboard-shell space-y-6">
+    <section class="nexa-dashboard-hero">
+      <div class="relative z-10 grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_minmax(330px,420px)] lg:p-6">
+        <div class="min-w-0">
+          <div class="mb-3 inline-flex items-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+            <Zap class="h-3.5 w-3.5" />
+            {{ t('admin.dashboard.eyebrow') }}
           </div>
           <h1 class="text-2xl font-semibold tracking-tight md:text-3xl">{{ t('admin.dashboard.title') }}</h1>
-          <p class="mt-1 max-w-2xl text-sm text-muted-foreground">{{ t('admin.dashboard.subtitle') }}</p>
-          <div class="mt-4 grid gap-3 text-xs sm:grid-cols-3">
-            <div class="rounded-lg border border-border/80 bg-background/72 px-3 py-2">
-              <div class="text-muted-foreground">{{ t('admin.dashboard.kpi.paymentSuccessRate') }}</div>
-              <div class="mt-1 text-base font-semibold">{{ overview?.kpi.payment_success_rate ?? '0.00' }}%</div>
-            </div>
-            <div class="rounded-lg border border-border/80 bg-background/72 px-3 py-2">
-              <div class="text-muted-foreground">{{ t('admin.dashboard.kpi.activeProducts') }}</div>
-              <div class="mt-1 text-base font-semibold">{{ overview?.kpi.active_products ?? 0 }}</div>
-            </div>
-            <div class="rounded-lg border border-border/80 bg-background/72 px-3 py-2">
-              <div class="text-muted-foreground">{{ t('admin.dashboard.period') }}</div>
-              <div class="mt-1 text-base font-semibold">{{ shortDate(overview?.from) }} - {{ shortDate(overview?.to) }}</div>
+          <p class="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{{ t('admin.dashboard.subtitle') }}</p>
+
+          <div class="mt-5 grid gap-3 sm:grid-cols-3">
+            <div
+              v-for="item in heroStats"
+              :key="item.label"
+              class="nexa-hero-stat"
+              :class="`nexa-tone-${item.tone}`"
+            >
+              <div class="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{{ item.label }}</div>
+              <div class="mt-1 text-xl font-semibold tracking-tight">{{ item.value }}</div>
+              <div class="mt-1 text-xs text-muted-foreground">{{ item.helper }}</div>
             </div>
           </div>
         </div>
-        <div class="relative flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:justify-end">
-          <div class="w-full sm:w-[150px]">
+
+        <div class="nexa-filter-panel">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{{ t('admin.dashboard.period') }}</div>
+              <div class="mt-1 text-sm font-semibold">{{ shortDate(overview?.from) }} - {{ shortDate(overview?.to) }}</div>
+            </div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1 text-xs text-muted-foreground">
+              <span class="h-2 w-2 rounded-full" :class="isDashboardLoading ? 'animate-pulse bg-amber-500' : 'bg-emerald-500'"></span>
+              {{ isDashboardLoading ? t('admin.dashboard.loadingSnapshot') : t('admin.dashboard.liveSnapshot') }}
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-2 sm:grid-cols-2">
             <Select v-model="filters.range" @update:modelValue="handleRangeChange">
               <SelectTrigger class="h-9">
                 <SelectValue :placeholder="t('admin.dashboard.filters.range')" />
@@ -402,376 +551,300 @@ onMounted(() => {
                 </SelectItem>
               </SelectContent>
             </Select>
+            <Button size="sm" class="h-9" :disabled="isDashboardLoading" @click="refreshDashboard">
+              <RefreshCw class="h-4 w-4" :class="isDashboardLoading ? 'animate-spin' : ''" />
+              {{ t('admin.dashboard.actions.refreshNow') }}
+            </Button>
+            <Input
+              v-if="isCustomRange"
+              v-model="filters.from"
+              type="date"
+              class="h-9"
+              :placeholder="t('admin.dashboard.filters.from')"
+              @update:modelValue="handleCustomRangeChange"
+            />
+            <Input
+              v-if="isCustomRange"
+              v-model="filters.to"
+              type="date"
+              class="h-9"
+              :placeholder="t('admin.dashboard.filters.to')"
+              @update:modelValue="handleCustomRangeChange"
+            />
           </div>
-          <Input
-            v-if="isCustomRange"
-            v-model="filters.from"
-            type="date"
-            class="h-9 w-full sm:w-[150px]"
-            :placeholder="t('admin.dashboard.filters.from')"
-            @update:modelValue="handleCustomRangeChange"
-          />
-          <Input
-            v-if="isCustomRange"
-            v-model="filters.to"
-            type="date"
-            class="h-9 w-full sm:w-[150px]"
-            :placeholder="t('admin.dashboard.filters.to')"
-            @update:modelValue="handleCustomRangeChange"
-          />
-          <Button size="sm" class="h-9 w-full sm:w-auto" :disabled="loadingOverview || loadingTrends || loadingRankings" @click="refreshDashboard">
-            {{ t('admin.dashboard.actions.refreshNow') }}
-          </Button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div v-if="dashboardError" class="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+    <div v-if="dashboardError" class="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
       {{ dashboardError }}
     </div>
 
-    <div class="min-w-0">
-      <DashboardAd slot-code="dashboard_top_banner" layout="banner" />
-    </div>
+    <DashboardAd slot-code="dashboard_top_banner" layout="banner" />
 
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 [&>*]:min-w-0">
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.ordersTotal') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ overview?.kpi.orders_total ?? 0 }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.kpi.paidOrders') }}: {{ overview?.kpi.paid_orders ?? 0 }}</div>
-        </CardContent>
-      </Card>
+    <section class="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <article
+        v-for="item in primaryMetrics"
+        :key="item.label"
+        class="nexa-metric-card"
+        :class="`nexa-tone-${item.tone}`"
+      >
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <div class="text-xs font-medium text-muted-foreground">{{ item.label }}</div>
+            <div class="mt-2 break-words text-2xl font-semibold tracking-tight">{{ item.value }}</div>
+            <div class="mt-2 text-xs text-muted-foreground">{{ item.helper }}</div>
+          </div>
+          <div class="nexa-metric-icon">
+            <component :is="item.icon" class="h-5 w-5" />
+          </div>
+        </div>
+      </article>
+    </section>
 
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.gmvPaid') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ formatMoney(overview?.kpi.gmv_paid, overview?.currency) }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.kpi.paymentSuccessRate') }}: {{ overview?.kpi.payment_success_rate ?? '0.00' }}%</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.totalCost') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ formatMoney(overview?.kpi.total_cost, overview?.currency) }}</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.totalProfit') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ formatMoney(overview?.kpi.total_profit, overview?.currency) }}</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.profitMargin') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ overview?.kpi.profit_margin ?? '0.00' }}%</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.pendingOrders') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ overview?.kpi.pending_payment_orders ?? 0 }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.kpi.processingOrders') }}: {{ overview?.kpi.processing_orders ?? 0 }}</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.newUsers') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ overview?.kpi.new_users ?? 0 }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.kpi.activeProducts') }}: {{ overview?.kpi.active_products ?? 0 }}</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.totalUserBalance') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ formatMoney(overview?.kpi.total_user_balance, overview?.currency) }}</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.lowStockProducts') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ overview?.kpi.low_stock_products ?? 0 }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.kpi.outOfStockProducts') }}: {{ overview?.kpi.out_of_stock_products ?? 0 }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.kpi.outOfStockSKUs') }}: {{ overview?.kpi.out_of_stock_skus ?? 0 }} / {{ t('admin.dashboard.kpi.lowStockSKUs') }}: {{ overview?.kpi.low_stock_skus ?? 0 }}</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.autoAvailableSecrets') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ overview?.kpi.auto_available_secrets ?? 0 }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.kpi.manualAvailableUnits') }}: {{ overview?.kpi.manual_available_units ?? 0 }}</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.kpi.paymentsSuccess') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-semibold tracking-tight text-foreground">{{ overview?.kpi.payments_success ?? 0 }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.kpi.paymentsFailed') }}: {{ overview?.kpi.payments_failed ?? 0 }}</div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-kpi-card min-w-0">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.period') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="text-sm font-medium">{{ shortDate(overview?.from) }} - {{ shortDate(overview?.to) }}</div>
-          <div class="mt-1 text-xs text-muted-foreground">{{ overview?.timezone || '-' }}</div>
-        </CardContent>
-      </Card>
-
-      <div class="min-w-0">
-        <DashboardAd slot-code="dashboard_kpi_card" layout="card" />
-      </div>
-    </div>
-
-    <div class="grid gap-4 xl:grid-cols-2 [&>*]:min-w-0">
-      <Card class="nexa-surface min-w-0 rounded-lg">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-sm">{{ t('admin.dashboard.trends.orderTitle') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div v-if="loadingTrends" class="text-sm text-muted-foreground">{{ t('admin.common.loading') }}</div>
-          <div v-else-if="trendPoints.length === 0" class="text-sm text-muted-foreground">{{ t('admin.dashboard.emptyTrend') }}</div>
-          <div v-else class="space-y-3">
+    <section class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(300px,420px)]">
+      <Card class="nexa-dashboard-panel min-w-0">
+        <CardHeader class="border-b border-border/70 p-4">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle class="flex items-center gap-2 text-sm">
+                <BarChart3 class="h-4 w-4 text-primary" />
+                {{ t('admin.dashboard.sections.performance') }}
+              </CardTitle>
+              <p class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.sections.performanceHint') }}</p>
+            </div>
             <div class="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-primary"></span>{{ t('admin.dashboard.trends.ordersTotal') }}</span>
               <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>{{ t('admin.dashboard.trends.ordersPaid') }}</span>
-            </div>
-            <div class="overflow-x-auto">
-              <div class="inline-flex items-end gap-2 rounded-lg border border-border/70 bg-background/55 px-2 py-3">
-                <div v-for="point in trendPoints" :key="point.date" class="flex shrink-0 flex-col items-center gap-1">
-                  <div class="flex h-32 items-end gap-0.5">
-                    <div class="w-2 rounded-t bg-primary/80" :style="{ height: orderTotalHeight(point.orders_total) }" :title="`${t('admin.dashboard.trends.ordersTotal')}: ${point.orders_total}`"></div>
-                    <div class="w-2 rounded-t bg-emerald-500/80" :style="{ height: orderPaidHeight(point.orders_paid) }" :title="`${t('admin.dashboard.trends.ordersPaid')}: ${point.orders_paid}`"></div>
-                  </div>
-                  <div class="whitespace-nowrap text-[10px] text-muted-foreground">{{ shortDate(point.date) }}</div>
-                  <div class="whitespace-nowrap text-[10px] font-medium text-emerald-600 dark:text-emerald-400">{{ formatMoney(point.profit, overview?.currency) }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card class="nexa-surface min-w-0 rounded-lg">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-sm">{{ t('admin.dashboard.trends.paymentTitle') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div v-if="loadingTrends" class="text-sm text-muted-foreground">{{ t('admin.common.loading') }}</div>
-          <div v-else-if="trendPoints.length === 0" class="text-sm text-muted-foreground">{{ t('admin.dashboard.emptyTrend') }}</div>
-          <div v-else class="space-y-3">
-            <div class="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-sky-500"></span>{{ t('admin.dashboard.trends.paymentsSuccess') }}</span>
               <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-rose-500"></span>{{ t('admin.dashboard.trends.paymentsFailed') }}</span>
             </div>
-            <div class="overflow-x-auto">
-              <div class="inline-flex items-end gap-2 rounded-lg border border-border/70 bg-background/55 px-2 py-3">
-                <div v-for="point in trendPoints" :key="`${point.date}-payment`" class="flex shrink-0 flex-col items-center gap-1">
-                  <div class="flex h-32 items-end gap-0.5">
-                    <div class="w-2 rounded-t bg-sky-500/80" :style="{ height: paymentSuccessHeight(point.payments_success) }" :title="`${t('admin.dashboard.trends.paymentsSuccess')}: ${point.payments_success}`"></div>
-                    <div class="w-2 rounded-t bg-rose-500/80" :style="{ height: paymentFailedHeight(point.payments_failed) }" :title="`${t('admin.dashboard.trends.paymentsFailed')}: ${point.payments_failed}`"></div>
-                  </div>
-                  <div class="whitespace-nowrap text-[10px] text-muted-foreground">{{ shortDate(point.date) }}</div>
+          </div>
+        </CardHeader>
+        <CardContent class="p-4">
+          <div v-if="loadingTrends" class="text-sm text-muted-foreground">{{ t('admin.common.loading') }}</div>
+          <div v-else-if="trendPoints.length === 0" class="text-sm text-muted-foreground">{{ t('admin.dashboard.emptyTrend') }}</div>
+          <div v-else class="nexa-chart-canvas overflow-x-auto">
+            <div class="inline-flex min-w-full items-end gap-3 px-2 pb-2 pt-4">
+              <div v-for="point in trendPoints" :key="point.date" class="nexa-chart-column">
+                <div class="flex h-44 items-end gap-1">
+                  <div class="w-2.5 rounded-t bg-primary/80" :style="{ height: orderTotalHeight(point.orders_total) }" :title="`${t('admin.dashboard.trends.ordersTotal')}: ${point.orders_total}`"></div>
+                  <div class="w-2.5 rounded-t bg-emerald-500/80" :style="{ height: orderPaidHeight(point.orders_paid) }" :title="`${t('admin.dashboard.trends.ordersPaid')}: ${point.orders_paid}`"></div>
+                  <div class="w-2.5 rounded-t bg-sky-500/80" :style="{ height: paymentSuccessHeight(point.payments_success) }" :title="`${t('admin.dashboard.trends.paymentsSuccess')}: ${point.payments_success}`"></div>
+                  <div class="w-2.5 rounded-t bg-rose-500/80" :style="{ height: paymentFailedHeight(point.payments_failed) }" :title="`${t('admin.dashboard.trends.paymentsFailed')}: ${point.payments_failed}`"></div>
                 </div>
+                <div class="mt-2 whitespace-nowrap text-[10px] text-muted-foreground">{{ shortDate(point.date) }}</div>
+                <div class="whitespace-nowrap text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">{{ formatMoney(point.profit, overview?.currency) }}</div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
-    </div>
 
-    <div class="grid gap-4 xl:grid-cols-3 [&>*]:min-w-0">
-      <Card class="nexa-surface min-w-0 rounded-lg">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-sm">{{ t('admin.dashboard.funnel.title') }}</CardTitle>
+      <Card class="nexa-dashboard-panel min-w-0">
+        <CardHeader class="border-b border-border/70 p-4">
+          <CardTitle class="flex items-center gap-2 text-sm">
+            <Gauge class="h-4 w-4 text-primary" />
+            {{ t('admin.dashboard.funnel.title') }}
+          </CardTitle>
+          <p class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.sections.funnelHint') }}</p>
         </CardHeader>
-        <CardContent>
+        <CardContent class="p-4">
           <div v-if="!overview" class="text-sm text-muted-foreground">{{ t('admin.common.loading') }}</div>
-          <div v-else class="space-y-3">
-            <div v-for="item in funnelSteps" :key="item.key" class="space-y-1">
-              <div class="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{{ item.label }}</span>
-                <span class="font-mono text-foreground">{{ item.value }}</span>
+          <div v-else class="space-y-4">
+            <div v-for="item in funnelSteps" :key="item.key" class="space-y-1.5">
+              <div class="flex items-center justify-between gap-3 text-xs">
+                <span class="text-muted-foreground">{{ item.label }}</span>
+                <span class="font-mono font-semibold">{{ item.value }}</span>
               </div>
-              <div class="h-2 rounded-full bg-muted">
-                <div class="h-2 rounded-full bg-primary/70" :style="{ width: funnelWidth(item.value) }"></div>
+              <div class="nexa-funnel-track">
+                <div class="nexa-funnel-fill" :style="{ width: funnelWidth(item.value) }"></div>
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs">
-              <div class="rounded-md border border-border bg-background/55 px-2 py-1">
+            <div class="grid grid-cols-2 gap-2 border-t border-border pt-4 text-xs">
+              <div class="nexa-mini-readout">
                 <div class="text-muted-foreground">{{ t('admin.dashboard.funnel.paymentConversionRate') }}</div>
-                <div class="font-semibold">{{ overview.funnel.payment_conversion_rate }}%</div>
+                <div class="mt-1 text-lg font-semibold">{{ asPercent(overview.funnel.payment_conversion_rate) }}</div>
               </div>
-              <div class="rounded-md border border-border bg-background/55 px-2 py-1">
+              <div class="nexa-mini-readout">
                 <div class="text-muted-foreground">{{ t('admin.dashboard.funnel.completionRate') }}</div>
-                <div class="font-semibold">{{ overview.funnel.completion_rate }}%</div>
+                <div class="mt-1 text-lg font-semibold">{{ asPercent(overview.funnel.completion_rate) }}</div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
+    </section>
 
-      <Card class="nexa-surface min-w-0 rounded-lg">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-sm">{{ t('admin.dashboard.rankings.topProductsTitle') }}</CardTitle>
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <article
+        v-for="item in operationMetrics"
+        :key="item.label"
+        class="nexa-operation-card"
+        :class="`nexa-tone-${item.tone}`"
+      >
+        <div class="flex items-center gap-3">
+          <div class="nexa-operation-icon">
+            <component :is="item.icon" class="h-4 w-4" />
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs text-muted-foreground">{{ item.label }}</div>
+            <div class="mt-1 text-xl font-semibold">{{ item.value }}</div>
+            <div class="mt-1 text-xs text-muted-foreground">{{ item.helper }}</div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <DashboardAd slot-code="dashboard_kpi_card" layout="card" />
+
+    <section class="grid gap-4 xl:grid-cols-2">
+      <Card class="nexa-dashboard-panel min-w-0">
+        <CardHeader class="border-b border-border/70 p-4">
+          <CardTitle class="flex items-center gap-2 text-sm">
+            <Package class="h-4 w-4 text-primary" />
+            {{ t('admin.dashboard.rankings.topProductsTitle') }}
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent class="p-4">
           <div v-if="loadingRankings" class="text-sm text-muted-foreground">{{ t('admin.common.loading') }}</div>
           <div v-else-if="!rankings || rankings.top_products.length === 0" class="text-sm text-muted-foreground">{{ t('admin.dashboard.rankings.empty') }}</div>
           <div v-else class="space-y-2">
-            <div v-for="item in rankings.top_products" :key="`${item.product_id}-${item.sku_id || 0}`" class="min-w-0 rounded-lg border border-border px-3 py-2">
-              <div class="line-clamp-1 min-w-0 text-sm font-medium">{{ item.title }}</div>
-              <div v-if="rankingSkuLabel(item)" class="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-                {{ t('admin.dashboard.rankings.skuLabel') }}: {{ rankingSkuLabel(item) }}
+            <div v-for="(item, index) in rankings.top_products" :key="`${item.product_id}-${item.sku_id || 0}`" class="nexa-ranking-row">
+              <div class="nexa-ranking-index">{{ index + 1 }}</div>
+              <div class="min-w-0 flex-1">
+                <div class="line-clamp-1 text-sm font-semibold">{{ item.title }}</div>
+                <div v-if="rankingSkuLabel(item)" class="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                  {{ t('admin.dashboard.rankings.skuLabel') }}: {{ rankingSkuLabel(item) }}
+                </div>
+                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <span>{{ t('admin.dashboard.rankings.paidOrders') }}: {{ item.paid_orders }}</span>
+                  <span>{{ t('admin.dashboard.rankings.quantity') }}: {{ item.quantity }}</span>
+                  <span>{{ t('admin.dashboard.rankings.profit') }}: {{ formatMoney(item.profit, overview?.currency) }}</span>
+                </div>
               </div>
-              <div class="mt-1 flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-                <span>{{ t('admin.dashboard.rankings.paidOrders') }}: {{ item.paid_orders }}</span>
-                <span>{{ t('admin.dashboard.rankings.quantity') }}: {{ item.quantity }}</span>
-              </div>
-              <div class="mt-1 flex flex-col gap-1 text-xs font-semibold text-foreground sm:flex-row sm:items-center sm:justify-between">
-                <span>{{ t('admin.dashboard.rankings.paidAmount') }}: {{ formatMoney(item.paid_amount, overview?.currency) }}</span>
-                <span>{{ t('admin.dashboard.rankings.profit') }}: {{ formatMoney(item.profit, overview?.currency) }}</span>
-              </div>
+              <div class="text-right text-sm font-semibold">{{ formatMoney(item.paid_amount, overview?.currency) }}</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card class="nexa-surface min-w-0 rounded-lg">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-sm">{{ t('admin.dashboard.rankings.topChannelsTitle') }}</CardTitle>
+      <Card class="nexa-dashboard-panel min-w-0">
+        <CardHeader class="border-b border-border/70 p-4">
+          <CardTitle class="flex items-center gap-2 text-sm">
+            <CreditCard class="h-4 w-4 text-primary" />
+            {{ t('admin.dashboard.rankings.topChannelsTitle') }}
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent class="p-4">
           <div v-if="loadingRankings" class="text-sm text-muted-foreground">{{ t('admin.common.loading') }}</div>
           <div v-else-if="!rankings || rankings.top_channels.length === 0" class="text-sm text-muted-foreground">{{ t('admin.dashboard.rankings.empty') }}</div>
           <div v-else class="space-y-2">
-            <div v-for="item in rankings.top_channels" :key="`${item.channel_id}-${item.channel_type}`" class="min-w-0 rounded-lg border border-border px-3 py-2">
-              <div class="line-clamp-1 min-w-0 text-sm font-medium">{{ channelLabel(item) }}</div>
-              <div class="mt-1 flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-                <span>{{ t('admin.dashboard.rankings.successCount') }}: {{ item.success_count }}</span>
-                <span>{{ t('admin.dashboard.rankings.failedCount') }}: {{ item.failed_count }}</span>
+            <div v-for="(item, index) in rankings.top_channels" :key="`${item.channel_id}-${item.channel_type}`" class="nexa-ranking-row">
+              <div class="nexa-ranking-index">{{ index + 1 }}</div>
+              <div class="min-w-0 flex-1">
+                <div class="line-clamp-1 text-sm font-semibold">{{ channelLabel(item) }}</div>
+                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <span>{{ t('admin.dashboard.rankings.successCount') }}: {{ item.success_count }}</span>
+                  <span>{{ t('admin.dashboard.rankings.failedCount') }}: {{ item.failed_count }}</span>
+                  <span>{{ t('admin.dashboard.rankings.successRate') }}: {{ asPercent(item.success_rate) }}</span>
+                </div>
               </div>
-              <div class="mt-1 flex flex-col gap-1 text-xs sm:flex-row sm:items-center sm:justify-between">
-                <span class="font-semibold text-foreground">{{ t('admin.dashboard.rankings.successAmount') }}: {{ formatMoney(item.success_amount, overview?.currency) }}</span>
-                <span class="text-muted-foreground">{{ t('admin.dashboard.rankings.successRate') }}: {{ item.success_rate }}%</span>
-              </div>
+              <div class="text-right text-sm font-semibold">{{ formatMoney(item.success_amount, overview?.currency) }}</div>
             </div>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </section>
 
-    <div class="min-w-0">
-      <DashboardAd slot-code="dashboard_sponsored" layout="compact" />
-    </div>
+    <DashboardAd slot-code="dashboard_sponsored" layout="compact" />
 
-    <div class="grid gap-4 xl:grid-cols-2 [&>*]:min-w-0">
-      <Card class="nexa-surface min-w-0 rounded-lg">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-sm">{{ t('admin.dashboard.alerts.title') }}</CardTitle>
+    <section class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
+      <Card class="nexa-dashboard-panel min-w-0">
+        <CardHeader class="border-b border-border/70 p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle class="flex items-center gap-2 text-sm">
+                <AlertTriangle class="h-4 w-4" :class="riskCount > 0 ? 'text-amber-500' : 'text-emerald-500'" />
+                {{ t('admin.dashboard.alerts.title') }}
+              </CardTitle>
+              <p class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.sections.riskHint', { count: riskCount }) }}</p>
+            </div>
+            <div class="rounded-full border border-border bg-background/70 px-3 py-1 text-xs font-medium">{{ riskCount }}</div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <!-- General alerts -->
-          <div v-if="overview && overview.alerts.filter(a => a.type !== 'out_of_stock_products' && a.type !== 'low_stock_products').length > 0" class="space-y-2 mb-3">
+        <CardContent class="p-4">
+          <div v-if="generalAlerts.length > 0" class="mb-3 space-y-2">
             <div
-              v-for="alert in overview.alerts.filter(a => a.type !== 'out_of_stock_products' && a.type !== 'low_stock_products')"
+              v-for="alert in generalAlerts"
               :key="`${alert.type}-${alert.value}`"
-              class="rounded-lg border px-3 py-2 text-sm"
+              class="nexa-alert-row"
               :class="alertClass(alert.level)"
             >
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-medium">{{ alertLabel(alert.type) }}</span>
-                <span class="font-mono text-xs">{{ alert.value }}</span>
-              </div>
+              <span class="font-medium">{{ alertLabel(alert.type) }}</span>
+              <span class="font-mono text-xs">{{ alert.value }}</span>
             </div>
           </div>
-          <!-- SKU inventory alerts -->
+
           <div v-if="inventoryAlerts.length > 0" class="space-y-2">
-            <div class="text-xs font-medium text-muted-foreground mb-1">{{ t('admin.dashboard.inventoryAlerts.title') }}</div>
+            <div class="text-xs font-medium text-muted-foreground">{{ t('admin.dashboard.inventoryAlerts.title') }}</div>
             <div
               v-for="(item, idx) in inventoryAlerts"
               :key="`inv-${item.product_id}-${item.sku_id || 0}-${idx}`"
-              class="rounded-lg border border-border px-3 py-2 text-sm"
+              class="nexa-inventory-row"
             >
-              <div class="flex items-center justify-between gap-2">
-                <div class="min-w-0 flex-1">
-                  <router-link :to="{ path: '/products', query: { product_id: item.product_id } }" class="font-medium text-primary underline-offset-4 hover:underline break-words">
-                    {{ getLocalizedText(item.product_title) }}
-                  </router-link>
-                  <div v-if="skuSpecLabel(item)" class="text-xs text-muted-foreground mt-0.5">
-                    SKU: {{ skuSpecLabel(item) }}
-                    <span v-if="item.sku_code" class="ml-1">({{ item.sku_code }})</span>
-                  </div>
+              <div class="min-w-0 flex-1">
+                <router-link :to="{ path: '/products', query: { product_id: item.product_id } }" class="line-clamp-1 font-medium text-primary underline-offset-4 hover:underline">
+                  {{ getLocalizedText(item.product_title) }}
+                </router-link>
+                <div v-if="skuSpecLabel(item)" class="mt-0.5 text-xs text-muted-foreground">
+                  SKU: {{ skuSpecLabel(item) }}
+                  <span v-if="item.sku_code" class="ml-1">({{ item.sku_code }})</span>
                 </div>
-                <div class="flex shrink-0 items-center gap-2">
-                  <span class="font-mono text-xs text-muted-foreground">{{ item.available_stock }}</span>
-                  <span class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium" :class="inventoryAlertBadgeClass(item)">
-                    {{ inventoryAlertLabel(item) }}
-                  </span>
-                </div>
+              </div>
+              <div class="flex shrink-0 items-center gap-2">
+                <span class="font-mono text-xs text-muted-foreground">{{ item.available_stock }}</span>
+                <span class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium" :class="inventoryAlertBadgeClass(item)">
+                  {{ inventoryAlertLabel(item) }}
+                </span>
               </div>
             </div>
           </div>
-          <div v-if="(!overview || overview.alerts.length === 0) && inventoryAlerts.length === 0" class="text-sm text-muted-foreground">
+
+          <div v-if="generalAlerts.length === 0 && inventoryAlerts.length === 0" class="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
             {{ t('admin.dashboard.alerts.empty') }}
           </div>
         </CardContent>
       </Card>
 
-      <Card class="nexa-surface min-w-0 rounded-lg">
-        <CardHeader class="pb-2">
-          <CardTitle class="text-sm">{{ t('admin.dashboard.quickActions.title') }}</CardTitle>
+      <Card class="nexa-dashboard-panel min-w-0">
+        <CardHeader class="border-b border-border/70 p-4">
+          <CardTitle class="flex items-center gap-2 text-sm">
+            <ArrowUpRight class="h-4 w-4 text-primary" />
+            {{ t('admin.dashboard.quickActions.title') }}
+          </CardTitle>
+          <p class="mt-1 text-xs text-muted-foreground">{{ t('admin.dashboard.quickActions.subtitle') }}</p>
         </CardHeader>
-        <CardContent>
-          <div class="grid grid-cols-2 gap-2 md:grid-cols-3">
-            <Button
+        <CardContent class="p-4">
+          <div class="grid gap-2">
+            <router-link
               v-for="action in quickActions"
               :key="action.path"
-              variant="outline"
-              size="sm"
-              class="justify-start"
-              as-child
+              :to="action.path"
+              class="nexa-action-tile group"
             >
-              <router-link :to="action.path">{{ action.label }}</router-link>
-            </Button>
+              <span class="nexa-action-icon">
+                <component :is="action.icon" class="h-4 w-4" />
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-semibold">{{ action.label }}</span>
+                <span class="mt-0.5 block truncate text-xs text-muted-foreground">{{ action.description }}</span>
+              </span>
+              <ChevronRight class="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+            </router-link>
           </div>
         </CardContent>
       </Card>
-    </div>
-
+    </section>
   </div>
 </template>

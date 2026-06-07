@@ -108,9 +108,31 @@ const reportImpression = async (data: AdRenderResponse) => {
   }
 }
 
+const normalizeSafeClickUrl = (rawUrl: string) => {
+  if (typeof window === 'undefined') return null
+  try {
+    const url = new URL(rawUrl, window.location.origin)
+    if (!['http:', 'https:'].includes(url.protocol)) return null
+    return url.href
+  } catch {
+    return null
+  }
+}
+
 const handleClick = (item: AdRenderItemDTO) => {
   if (!item.click_url || item.link_type === 'none') return
-  window.open(item.click_url, item.open_in_new_tab ? '_blank' : '_self')
+  const safeUrl = normalizeSafeClickUrl(item.click_url)
+  if (!safeUrl) return
+
+  if (item.open_in_new_tab) {
+    const nextWindow = window.open(safeUrl, '_blank', 'noopener,noreferrer')
+    if (nextWindow) {
+      nextWindow.opener = null
+    }
+    return
+  }
+
+  window.location.assign(safeUrl)
 }
 
 const handleDismiss = (item: AdRenderItemDTO) => {

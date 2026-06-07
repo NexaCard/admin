@@ -219,4 +219,306 @@
   .nexa-kpi-card > * {
     position: relative;
   }
+
+  .dashboard-shell {
+    --nexa-panel-glow: hsl(198 100% 58% / 0.08);
+  }
+
+  .nexa-dashboard-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    background:
+      linear-gradient(135deg, hsl(var(--card) / 0.98), hsl(var(--muted) / 0.46)),
+      linear-gradient(90deg, hsl(var(--primary) / 0.16), transparent 42%, hsl(var(--accent) / 0.12));
+    box-shadow: 0 22px 70px hsl(222 47% 5% / 0.08);
+  }
+
+  .nexa-dashboard-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.045) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(90deg, black, transparent 76%);
+    pointer-events: none;
+  }
+
+  .dark .nexa-dashboard-hero {
+    background:
+      linear-gradient(135deg, hsl(222 43% 9% / 0.98), hsl(222 47% 6% / 0.96)),
+      linear-gradient(90deg, hsl(198 100% 58% / 0.16), transparent 44%, hsl(172 83% 48% / 0.1));
+    box-shadow: 0 28px 90px hsl(198 100% 58% / 0.08);
+  }
+
+  .nexa-filter-panel {
+    @apply rounded-lg border border-border bg-background/75 p-4 shadow-sm backdrop-blur;
+  }
+
+  .dark .nexa-filter-panel {
+    background: hsl(222 47% 5% / 0.72);
+    box-shadow: inset 0 1px 0 hsl(204 45% 94% / 0.04);
+  }
+
+  .nexa-hero-stat,
+  .nexa-metric-card,
+  .nexa-operation-card {
+    --nexa-tone: hsl(var(--primary));
+    --nexa-tone-soft: hsl(var(--primary) / 0.1);
+    --nexa-tone-border: hsl(var(--primary) / 0.2);
+  }
+
+  .nexa-tone-primary,
+  .nexa-tone-info {
+    --nexa-tone: hsl(var(--primary));
+    --nexa-tone-soft: hsl(var(--primary) / 0.11);
+    --nexa-tone-border: hsl(var(--primary) / 0.24);
+  }
+
+  .nexa-tone-success {
+    --nexa-tone: hsl(160 84% 39%);
+    --nexa-tone-soft: hsl(160 84% 39% / 0.11);
+    --nexa-tone-border: hsl(160 84% 39% / 0.24);
+  }
+
+  .dark .nexa-tone-success {
+    --nexa-tone: hsl(158 74% 52%);
+    --nexa-tone-soft: hsl(158 74% 52% / 0.12);
+    --nexa-tone-border: hsl(158 74% 52% / 0.24);
+  }
+
+  .nexa-tone-warning {
+    --nexa-tone: hsl(38 92% 50%);
+    --nexa-tone-soft: hsl(38 92% 50% / 0.12);
+    --nexa-tone-border: hsl(38 92% 50% / 0.25);
+  }
+
+  .nexa-tone-violet {
+    --nexa-tone: hsl(255 67% 58%);
+    --nexa-tone-soft: hsl(255 67% 58% / 0.11);
+    --nexa-tone-border: hsl(255 67% 58% / 0.23);
+  }
+
+  .dark .nexa-tone-violet {
+    --nexa-tone: hsl(255 70% 70%);
+    --nexa-tone-soft: hsl(255 70% 70% / 0.12);
+    --nexa-tone-border: hsl(255 70% 70% / 0.24);
+  }
+
+  .nexa-tone-muted {
+    --nexa-tone: hsl(var(--muted-foreground));
+    --nexa-tone-soft: hsl(var(--muted) / 0.65);
+    --nexa-tone-border: hsl(var(--border));
+  }
+
+  .nexa-hero-stat {
+    @apply rounded-lg border p-3;
+    border-color: var(--nexa-tone-border);
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.78), hsl(var(--background) / 0.56)),
+      linear-gradient(135deg, var(--nexa-tone-soft), transparent 58%);
+  }
+
+  .dark .nexa-hero-stat {
+    background:
+      linear-gradient(180deg, hsl(222 43% 10% / 0.62), hsl(222 47% 5% / 0.5)),
+      linear-gradient(135deg, var(--nexa-tone-soft), transparent 62%);
+  }
+
+  .nexa-metric-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--nexa-tone-border);
+    border-radius: var(--radius);
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.95), hsl(var(--background) / 0.72)),
+      linear-gradient(135deg, var(--nexa-tone-soft), transparent 60%);
+    padding: 1rem;
+    box-shadow: 0 16px 48px hsl(222 47% 5% / 0.07);
+  }
+
+  .dark .nexa-metric-card {
+    background:
+      linear-gradient(180deg, hsl(222 43% 10% / 0.92), hsl(222 47% 6% / 0.88)),
+      linear-gradient(135deg, var(--nexa-tone-soft), transparent 62%);
+    box-shadow: 0 18px 58px hsl(198 100% 58% / 0.055);
+  }
+
+  .nexa-metric-card::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--nexa-tone), transparent);
+    opacity: 0.75;
+  }
+
+  .nexa-metric-icon,
+  .nexa-operation-icon,
+  .nexa-action-icon {
+    @apply inline-flex shrink-0 items-center justify-center rounded-lg;
+    border: 1px solid var(--nexa-tone-border);
+    background: var(--nexa-tone-soft);
+    color: var(--nexa-tone);
+  }
+
+  .nexa-metric-icon {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+
+  .nexa-dashboard-panel {
+    border-radius: var(--radius);
+    border-color: hsl(var(--border));
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.96), hsl(var(--background) / 0.82)),
+      linear-gradient(135deg, hsl(var(--primary) / 0.055), transparent 54%, hsl(var(--accent) / 0.045));
+    box-shadow: 0 16px 54px hsl(222 47% 5% / 0.07);
+  }
+
+  .dark .nexa-dashboard-panel {
+    background:
+      linear-gradient(180deg, hsl(222 43% 9% / 0.94), hsl(222 47% 6% / 0.92)),
+      linear-gradient(135deg, hsl(198 100% 58% / 0.06), transparent 56%, hsl(172 83% 48% / 0.045));
+    box-shadow: 0 18px 60px hsl(198 100% 58% / 0.055);
+  }
+
+  .nexa-chart-canvas {
+    min-height: 15rem;
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    background:
+      linear-gradient(hsl(var(--foreground) / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.04) 1px, transparent 1px),
+      hsl(var(--background) / 0.46);
+    background-size: 36px 36px;
+  }
+
+  .nexa-chart-column {
+    display: flex;
+    min-width: 3.6rem;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nexa-funnel-track {
+    height: 0.55rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: hsl(var(--muted));
+  }
+
+  .nexa-funnel-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+    transition: width 180ms ease;
+  }
+
+  .nexa-mini-readout {
+    @apply rounded-lg border border-border bg-background/55 p-3;
+  }
+
+  .nexa-operation-card {
+    border: 1px solid var(--nexa-tone-border);
+    border-radius: var(--radius);
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.92), hsl(var(--background) / 0.68)),
+      linear-gradient(135deg, var(--nexa-tone-soft), transparent 58%);
+    padding: 1rem;
+  }
+
+  .dark .nexa-operation-card {
+    background:
+      linear-gradient(180deg, hsl(222 43% 10% / 0.82), hsl(222 47% 6% / 0.82)),
+      linear-gradient(135deg, var(--nexa-tone-soft), transparent 62%);
+  }
+
+  .nexa-operation-icon,
+  .nexa-action-icon {
+    height: 2.25rem;
+    width: 2.25rem;
+  }
+
+  .nexa-ranking-row,
+  .nexa-inventory-row,
+  .nexa-action-tile {
+    @apply rounded-lg border border-border bg-background/55;
+  }
+
+  .nexa-ranking-row {
+    @apply flex items-center gap-3 p-3;
+  }
+
+  .nexa-ranking-index {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-semibold;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+
+  .nexa-alert-row {
+    @apply flex min-h-11 items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm;
+  }
+
+  .nexa-alert-row-danger {
+    border-color: hsl(0 84% 60% / 0.28);
+    background: hsl(0 84% 60% / 0.09);
+    color: hsl(0 72% 45%);
+  }
+
+  .dark .nexa-alert-row-danger {
+    color: hsl(0 84% 76%);
+  }
+
+  .nexa-alert-row-warning {
+    border-color: hsl(38 92% 50% / 0.3);
+    background: hsl(38 92% 50% / 0.1);
+    color: hsl(32 95% 38%);
+  }
+
+  .dark .nexa-alert-row-warning {
+    color: hsl(38 96% 68%);
+  }
+
+  .nexa-alert-row-neutral {
+    border-color: hsl(var(--border));
+    background: hsl(var(--background) / 0.55);
+    color: hsl(var(--foreground));
+  }
+
+  .nexa-inventory-row {
+    @apply flex min-h-12 items-center justify-between gap-3 p-3 text-sm;
+  }
+
+  .nexa-action-tile {
+    @apply flex min-h-12 items-center gap-3 p-3 transition-colors;
+    color: hsl(var(--foreground));
+  }
+
+  .nexa-action-tile:hover {
+    border-color: hsl(var(--primary) / 0.32);
+    background: hsl(var(--primary) / 0.075);
+  }
+
+  .nexa-action-tile:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  .nexa-action-icon {
+    --nexa-tone: hsl(var(--primary));
+    --nexa-tone-soft: hsl(var(--primary) / 0.1);
+    --nexa-tone-border: hsl(var(--primary) / 0.22);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nexa-funnel-fill,
+    .nexa-action-tile,
+    .nexa-action-tile * {
+      transition: none;
+    }
+  }
 }
