@@ -105,8 +105,8 @@
 @layer components {
   .nexa-shell {
     background:
-      radial-gradient(circle at top left, hsl(198 100% 58% / 0.16), transparent 34rem),
-      radial-gradient(circle at 82% 10%, hsl(172 83% 48% / 0.12), transparent 28rem),
+      linear-gradient(135deg, hsl(var(--background)), hsl(var(--muted) / 0.48) 46%, hsl(var(--background))),
+      linear-gradient(90deg, hsl(var(--primary) / 0.08), transparent 34%, hsl(var(--accent) / 0.07)),
       linear-gradient(135deg, hsl(var(--background)), hsl(var(--background)));
   }
 
@@ -122,9 +122,17 @@
 
   .nexa-sidebar {
     background:
-      linear-gradient(180deg, hsl(222 47% 7% / 0.96), hsl(222 47% 4% / 0.98)),
-      radial-gradient(circle at 20% 0%, hsl(198 100% 58% / 0.18), transparent 20rem);
+      linear-gradient(180deg, hsl(222 47% 7% / 0.98), hsl(222 47% 4% / 0.99)),
+      linear-gradient(135deg, hsl(198 100% 58% / 0.12), transparent 38%, hsl(172 83% 48% / 0.08));
     color: hsl(204 45% 94%);
+    --nexa-sidebar-strong: hsl(204 45% 96%);
+    --nexa-sidebar-text: hsl(204 45% 84% / 0.82);
+    --nexa-sidebar-muted: hsl(204 45% 84% / 0.52);
+    --nexa-sidebar-faint: hsl(204 45% 84% / 0.34);
+    --nexa-sidebar-border: hsl(204 45% 84% / 0.12);
+    --nexa-sidebar-hover: hsl(204 45% 96% / 0.075);
+    --nexa-sidebar-active-bg: hsl(198 100% 58% / 0.15);
+    --nexa-sidebar-active-ring: hsl(198 100% 58% / 0.24);
   }
 
   .nexa-brand-mark {
@@ -132,6 +140,60 @@
     background: linear-gradient(135deg, hsl(198 100% 58%), hsl(172 83% 48%));
     color: hsl(222 47% 5%);
     box-shadow: 0 0 30px hsl(198 100% 58% / 0.28);
+  }
+
+  .nexa-sidebar-border {
+    border-color: var(--nexa-sidebar-border);
+  }
+
+  .nexa-sidebar-brand {
+    color: var(--nexa-sidebar-strong);
+  }
+
+  .nexa-sidebar-muted {
+    color: var(--nexa-sidebar-muted);
+  }
+
+  .nexa-sidebar-faint {
+    color: var(--nexa-sidebar-faint);
+  }
+
+  .nexa-sidebar-input {
+    border-color: var(--nexa-sidebar-border);
+    background: hsl(204 45% 96% / 0.055);
+    color: var(--nexa-sidebar-strong);
+  }
+
+  .nexa-sidebar-input::placeholder {
+    color: var(--nexa-sidebar-faint);
+  }
+
+  .nexa-sidebar-link,
+  .nexa-sidebar-group,
+  .nexa-sidebar-toggle {
+    color: var(--nexa-sidebar-text);
+  }
+
+  .nexa-sidebar-link:hover,
+  .nexa-sidebar-group:hover,
+  .nexa-sidebar-toggle:hover {
+    background: var(--nexa-sidebar-hover);
+    color: var(--nexa-sidebar-strong);
+  }
+
+  .nexa-sidebar-link-active,
+  .nexa-sidebar-group-active {
+    background: var(--nexa-sidebar-active-bg);
+    color: hsl(190 100% 88%);
+    box-shadow: inset 0 0 0 1px var(--nexa-sidebar-active-ring);
+  }
+
+  .nexa-sidebar-chevron {
+    color: var(--nexa-sidebar-faint);
+  }
+
+  .nexa-sidebar-divider {
+    border-color: var(--nexa-sidebar-border);
   }
 
   .nexa-grid {

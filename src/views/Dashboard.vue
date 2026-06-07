@@ -369,23 +369,22 @@ onMounted(() => {
   <div class="space-y-5">
     <div class="nexa-surface overflow-hidden rounded-lg">
       <div class="relative flex flex-col gap-5 p-5 xl:flex-row xl:items-end xl:justify-between">
-        <div class="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_70%_20%,hsl(198_100%_58%/0.18),transparent_22rem)] xl:block"></div>
         <div class="relative">
-          <div class="mb-2 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
+          <div class="mb-2 inline-flex items-center rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-primary">
             NexaCard Command
           </div>
           <h1 class="text-2xl font-semibold tracking-tight md:text-3xl">{{ t('admin.dashboard.title') }}</h1>
           <p class="mt-1 max-w-2xl text-sm text-muted-foreground">{{ t('admin.dashboard.subtitle') }}</p>
           <div class="mt-4 grid gap-3 text-xs sm:grid-cols-3">
-            <div class="rounded-lg border border-border/80 bg-background/55 px-3 py-2">
+            <div class="rounded-lg border border-border/80 bg-background/72 px-3 py-2">
               <div class="text-muted-foreground">{{ t('admin.dashboard.kpi.paymentSuccessRate') }}</div>
               <div class="mt-1 text-base font-semibold">{{ overview?.kpi.payment_success_rate ?? '0.00' }}%</div>
             </div>
-            <div class="rounded-lg border border-border/80 bg-background/55 px-3 py-2">
+            <div class="rounded-lg border border-border/80 bg-background/72 px-3 py-2">
               <div class="text-muted-foreground">{{ t('admin.dashboard.kpi.activeProducts') }}</div>
               <div class="mt-1 text-base font-semibold">{{ overview?.kpi.active_products ?? 0 }}</div>
             </div>
-            <div class="rounded-lg border border-border/80 bg-background/55 px-3 py-2">
+            <div class="rounded-lg border border-border/80 bg-background/72 px-3 py-2">
               <div class="text-muted-foreground">{{ t('admin.dashboard.period') }}</div>
               <div class="mt-1 text-base font-semibold">{{ shortDate(overview?.from) }} - {{ shortDate(overview?.to) }}</div>
             </div>

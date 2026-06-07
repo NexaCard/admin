@@ -184,30 +184,28 @@ onUnmounted(() => {
 <template>
   <div class="nexa-shell relative flex min-h-screen items-center justify-center overflow-hidden px-6 text-foreground">
     <div class="absolute inset-0 nexa-grid opacity-70"></div>
-    <div class="pointer-events-none absolute left-[8%] top-[12%] h-56 w-56 rounded-full bg-primary/15 blur-3xl"></div>
-    <div class="pointer-events-none absolute bottom-[10%] right-[10%] h-72 w-72 rounded-full bg-accent/12 blur-3xl"></div>
     <div class="relative grid w-full max-w-5xl items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
       <div class="hidden lg:block">
         <div class="nexa-brand-mark mb-6 h-14 w-14 text-base">NX</div>
-        <div class="inline-flex rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.22em] text-primary">
+        <div class="inline-flex rounded-md border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-primary">
           NexaCard Admin
         </div>
         <h1 class="mt-5 max-w-xl text-4xl font-semibold tracking-tight text-foreground">
-          Command center for cards, orders, payments and growth.
+          Operations console for card commerce, payments and fulfillment.
         </h1>
         <p class="mt-4 max-w-lg text-sm leading-6 text-muted-foreground">
-          A calmer dark cockpit for daily operations, tuned with electric blue actions and soft teal status signals.
+          A focused workspace for daily operations, designed around clear data density, calm contrast and predictable controls.
         </p>
         <div class="mt-8 grid max-w-xl grid-cols-3 gap-3 text-xs">
-          <div class="rounded-lg border border-border bg-card/70 px-3 py-3 backdrop-blur">
+          <div class="rounded-lg border border-border bg-card/80 px-3 py-3">
             <div class="text-muted-foreground">Orders</div>
             <div class="mt-1 font-semibold">Realtime</div>
           </div>
-          <div class="rounded-lg border border-border bg-card/70 px-3 py-3 backdrop-blur">
+          <div class="rounded-lg border border-border bg-card/80 px-3 py-3">
             <div class="text-muted-foreground">Payments</div>
             <div class="mt-1 font-semibold">Monitored</div>
           </div>
-          <div class="rounded-lg border border-border bg-card/70 px-3 py-3 backdrop-blur">
+          <div class="rounded-lg border border-border bg-card/80 px-3 py-3">
             <div class="text-muted-foreground">Inventory</div>
             <div class="mt-1 font-semibold">Guarded</div>
           </div>
