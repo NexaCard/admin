@@ -25,7 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { notifySuccess, notifyError } from '@/utils/notify'
-import { Plus, Copy, Loader2, RotateCcw, Trash2, Pencil } from 'lucide-vue-next'
+import { Plus, Copy, Eye, EyeOff, Loader2, RotateCcw, Trash2, Pencil } from 'lucide-vue-next'
 
 const { t } = useI18n()
 
@@ -48,6 +48,7 @@ const loading = ref(false)
 const clients = ref<ChannelClient[]>([])
 const showCreateDialog = ref(false)
 const creating = ref(false)
+const revealedSecretIds = ref<number[]>([])
 
 // Edit dialog
 const showEditDialog = ref(false)
@@ -190,6 +191,25 @@ const copyToClipboard = async (text: string) => {
   }
 }
 
+const maskSecretValue = (value: string) => {
+  const text = String(value || '')
+  if (!text) return '-'
+  if (text.length <= 8) return '********'
+  return `${text.slice(0, 4)}********${text.slice(-4)}`
+}
+
+const isSecretRevealed = (id: number) => revealedSecretIds.value.includes(Number(id || 0))
+
+const toggleSecretReveal = (id: number) => {
+  const normalized = Number(id || 0)
+  if (!normalized) return
+  if (isSecretRevealed(normalized)) {
+    revealedSecretIds.value = revealedSecretIds.value.filter((item) => item !== normalized)
+    return
+  }
+  revealedSecretIds.value = [...revealedSecretIds.value, normalized]
+}
+
 onMounted(() => {
   fetchClients()
 })
@@ -252,7 +272,11 @@ onMounted(() => {
               </TableCell>
               <TableCell class="min-w-[160px]">
                 <div class="flex items-center gap-1">
-                  <code class="block max-w-[180px] break-all rounded bg-muted px-1.5 py-0.5 text-xs">{{ client.channel_secret }}</code>
+                  <code class="block max-w-[180px] truncate rounded bg-muted px-1.5 py-0.5 text-xs">{{ isSecretRevealed(client.id) ? client.channel_secret : maskSecretValue(client.channel_secret) }}</code>
+                  <Button variant="ghost" size="sm" class="h-6 w-6 p-0 shrink-0" @click="toggleSecretReveal(client.id)">
+                    <EyeOff v-if="isSecretRevealed(client.id)" class="h-3 w-3" />
+                    <Eye v-else class="h-3 w-3" />
+                  </Button>
                   <Button variant="ghost" size="sm" class="h-6 w-6 p-0 shrink-0" @click="copyToClipboard(client.channel_secret)">
                     <Copy class="h-3 w-3" />
                   </Button>
@@ -314,7 +338,7 @@ onMounted(() => {
           </div>
           <div class="space-y-2">
             <Label>{{ t('telegramBot.channelClients.botToken') }}</Label>
-            <Input v-model="createForm.bot_token" :placeholder="t('telegramBot.channelClients.botTokenPlaceholder')" />
+            <Input v-model="createForm.bot_token" type="password" :placeholder="t('telegramBot.channelClients.botTokenPlaceholder')" />
             <p class="text-xs text-muted-foreground">{{ t('telegramBot.channelClients.botTokenHint') }}</p>
           </div>
           <div class="space-y-2">
@@ -351,7 +375,7 @@ onMounted(() => {
           </div>
           <div class="space-y-2">
             <Label>{{ t('telegramBot.channelClients.botToken') }}</Label>
-            <Input v-model="editForm.bot_token" :placeholder="t('telegramBot.channelClients.botTokenEditPlaceholder')" />
+            <Input v-model="editForm.bot_token" type="password" :placeholder="t('telegramBot.channelClients.botTokenEditPlaceholder')" />
             <p class="text-xs text-muted-foreground">
               <template v-if="editingClient?.bot_token_set">
                 {{ t('telegramBot.channelClients.botTokenCurrentSet') }}

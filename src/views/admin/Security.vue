@@ -9,6 +9,7 @@ import { confirmAction } from '@/utils/confirm'
 import Setup2FAModal from './components/Setup2FAModal.vue'
 import RecoveryCodesModal from './components/RecoveryCodesModal.vue'
 import { formatDate } from '@/utils/format'
+import { removeSessionItem } from '@/utils/sessionStorage'
 
 const { t } = useI18n()
 const loading = ref(false)
@@ -65,7 +66,7 @@ const submitDisable = async () => {
     disableForm.code = ''
     disableForm.recoveryCode = ''
     disableForm.useRecovery = false
-    localStorage.removeItem('admin_token')
+    removeSessionItem('admin_token')
     const adminPath = import.meta.env.VITE_ADMIN_PATH || ''
     window.location.href = `${adminPath}/login`
   } catch (err: any) {
@@ -120,7 +121,7 @@ const changePassword = async () => {
       new_password: passwordForm.new,
     })
     notifySuccess(t('admin.settings.alerts.passwordSuccess'))
-    localStorage.removeItem('admin_token')
+    removeSessionItem('admin_token')
     const adminPath = import.meta.env.VITE_ADMIN_PATH || ''
     window.location.href = `${adminPath}/login`
   } catch (err: any) {

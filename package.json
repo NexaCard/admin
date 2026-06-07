@@ -1,7 +1,7 @@
 {
-  "name": "admin-web",
+  "name": "nexacard-admin",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite --port 5174",
@@ -23,10 +23,12 @@
     "@tiptap/extension-text-style": "^2.27.2",
     "@tiptap/starter-kit": "^2.27.2",
     "@tiptap/vue-3": "^2.27.2",
+    "@types/dompurify": "^3.0.5",
     "@types/qrcode": "^1.5.6",
     "@vueuse/core": "^14.2.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dompurify": "^3.4.8",
     "lucide-vue-next": "^0.563.0",
     "marked": "^18.0.2",
     "pinia": "^3.0.4",

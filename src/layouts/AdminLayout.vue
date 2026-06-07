@@ -57,6 +57,7 @@ import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api/admin'
 import { applySiteIcon } from '@/utils/favicon'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 marked.setOptions({ gfm: true, breaks: true })
 
@@ -128,7 +129,9 @@ const updateCheckError = ref<string>('')
 const renderedReleaseNotes = computed(() => {
   const raw = updateCheckResult.value?.release_notes
   if (!raw) return ''
-  return marked.parse(raw, { async: false }) as string
+  return DOMPurify.sanitize(marked.parse(raw, { async: false }) as string, {
+    ADD_ATTR: ['target', 'rel'],
+  })
 })
 
 const formatPublishedAt = (raw: string | null | undefined) => {

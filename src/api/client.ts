@@ -1,6 +1,7 @@
 import i18n from '@/i18n'
 import type { ApiResponse } from './types'
 import { notifyError } from '@/utils/notify'
+import { getSessionItem, removeSessionItem } from '@/utils/sessionStorage'
 
 export type { ApiResponse }
 
@@ -22,7 +23,7 @@ const API_PREFIX = '/api/v1'
 const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH || ''
 
 const redirectToLogin = () => {
-  localStorage.removeItem('admin_token')
+  removeSessionItem('admin_token')
   window.location.href = `${ADMIN_PATH}/login`
 }
 
@@ -108,7 +109,7 @@ async function request(method: string, path: string, bodyOrOptions?: any, option
     headers['X-Lang'] = locale
   }
 
-  const token = localStorage.getItem('admin_token')
+  const token = getSessionItem('admin_token')
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }

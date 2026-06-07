@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useDebounceFn } from '@vueuse/core'
 import { adminAPI, type AdminCardSecretQueryPayload } from '@/api/admin'
 import type { AdminProduct, AdminProductSKU, AdminCardSecret, AdminCardSecretBatch } from '@/api/types'
-import { Upload, PackagePlus } from 'lucide-vue-next'
+import { Copy, Eye, EyeOff, PackagePlus, Upload } from 'lucide-vue-next'
 import IdCell from '@/components/IdCell.vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -18,6 +18,7 @@ import { useListRefresh, type ListFetchOptions } from '@/composables/useListRefr
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatDate, getLocalizedText } from '@/utils/format'
 import { confirmAction } from '@/utils/confirm'
+import { notifyError, notifySuccess } from '@/utils/notify'
 import CardSecretEditModal from './components/CardSecretEditModal.vue'
 
 const { t } = useI18n()
@@ -69,6 +70,7 @@ const batchActionSuccess = ref('')
 
 const showEditModal = ref(false)
 const editingCardSecret = ref<AdminCardSecret | null>(null)
+const revealedSecretIds = ref<number[]>([])
 
 const normalizeFilterValue = (value: string) => (value === '__all__' ? '' : value)
 
@@ -210,6 +212,36 @@ const resolveSecretBatchLabel = (secret: AdminCardSecret) => {
   if (secret.batch) return buildBatchLabel(secret.batch)
   if (secret.batch_id) return `#${secret.batch_id}`
   return '-'
+}
+
+const maskSecretValue = (value: string | null | undefined) => {
+  const text = String(value || '')
+  if (!text) return '-'
+  if (text.length <= 8) return '********'
+  return `${text.slice(0, 4)}********${text.slice(-4)}`
+}
+
+const isSecretRevealed = (id: number) => revealedSecretIds.value.includes(Number(id || 0))
+
+const toggleSecretReveal = (id: number) => {
+  const normalized = Number(id || 0)
+  if (!normalized) return
+  if (isSecretRevealed(normalized)) {
+    revealedSecretIds.value = revealedSecretIds.value.filter((item) => item !== normalized)
+    return
+  }
+  revealedSecretIds.value = [...revealedSecretIds.value, normalized]
+}
+
+const copySecretValue = async (value: string | null | undefined) => {
+  const text = String(value || '')
+  if (!text) return
+  try {
+    await navigator.clipboard.writeText(text)
+    notifySuccess(t('admin.common.copied'))
+  } catch {
+    notifyError(t('admin.common.copyFailed'))
+  }
 }
 
 const productLink = (productId: number) => `${adminPath}/products?product_id=${productId}`
@@ -1106,7 +1138,20 @@ onMounted(async () => {
                 <TableCell class="px-4 py-3">
                   <IdCell :value="secret.id" />
                 </TableCell>
-                <TableCell class="min-w-[100px] break-all px-4 py-3 font-mono text-xs text-muted-foreground">{{ secret.secret }}</TableCell>
+                <TableCell class="min-w-[160px] px-4 py-3">
+                  <div class="flex max-w-[260px] items-center gap-1.5">
+                    <code class="min-w-0 flex-1 truncate rounded bg-muted px-2 py-1 font-mono text-xs text-muted-foreground">
+                      {{ isSecretRevealed(secret.id) ? secret.secret : maskSecretValue(secret.secret) }}
+                    </code>
+                    <Button size="sm" variant="ghost" class="h-7 w-7 shrink-0 p-0" @click="toggleSecretReveal(secret.id)">
+                      <EyeOff v-if="isSecretRevealed(secret.id)" class="h-3.5 w-3.5" />
+                      <Eye v-else class="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" class="h-7 w-7 shrink-0 p-0" @click="copySecretValue(secret.secret)">
+                      <Copy class="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </TableCell>
                 <TableCell class="min-w-[100px] px-4 py-3 text-xs text-muted-foreground">
                   <a
                     v-if="secret.product_id"

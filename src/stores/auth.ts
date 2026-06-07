@@ -6,6 +6,7 @@ import {
   type AdminLoginChallengeResponse,
   type AdminLoginPasswordResponse,
 } from '@/api/admin'
+import { getSessionItem, removeSessionItem, setSessionItem } from '@/utils/sessionStorage'
 
 const TOKEN_KEY = 'admin_token'
 const ROLES_KEY = 'admin_roles'
@@ -13,7 +14,7 @@ const PERMISSIONS_KEY = 'admin_permissions'
 const IS_SUPER_KEY = 'admin_is_super'
 
 function readArrayStorage(key: string): string[] {
-  const raw = localStorage.getItem(key)
+  const raw = getSessionItem(key)
   if (!raw) {
     return []
   }
@@ -82,8 +83,8 @@ function buildPermissionKeys(policies: AdminAuthzPolicy[]): string[] {
 export const useAdminAuthStore = defineStore('adminAuth', {
   state: () => ({
     loading: false,
-    token: localStorage.getItem(TOKEN_KEY) || '',
-    isSuper: localStorage.getItem(IS_SUPER_KEY) === '1',
+    token: getSessionItem(TOKEN_KEY) || '',
+    isSuper: getSessionItem(IS_SUPER_KEY) === '1',
     roles: readArrayStorage(ROLES_KEY),
     permissions: readArrayStorage(PERMISSIONS_KEY),
     permissionsLoaded: false,
@@ -106,7 +107,7 @@ export const useAdminAuthStore = defineStore('adminAuth', {
         }
         const ok = data as AdminLoginPasswordResponse
         this.token = ok.token
-        localStorage.setItem(TOKEN_KEY, ok.token)
+        setSessionItem(TOKEN_KEY, ok.token)
         this.requiresTotp = false
         this.challengeToken = ''
         this.challengeExpiresAt = ''
@@ -129,7 +130,7 @@ export const useAdminAuthStore = defineStore('adminAuth', {
         })
         const data = response.data.data as AdminLoginPasswordResponse
         this.token = data.token
-        localStorage.setItem(TOKEN_KEY, data.token)
+        setSessionItem(TOKEN_KEY, data.token)
         this.requiresTotp = false
         this.challengeToken = ''
         this.challengeExpiresAt = ''
@@ -157,9 +158,9 @@ export const useAdminAuthStore = defineStore('adminAuth', {
       this.permissions = Array.isArray(payload?.policies) ? buildPermissionKeys(payload.policies) : []
       this.permissionsLoaded = true
 
-      localStorage.setItem(IS_SUPER_KEY, this.isSuper ? '1' : '0')
-      localStorage.setItem(ROLES_KEY, JSON.stringify(this.roles))
-      localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(this.permissions))
+      setSessionItem(IS_SUPER_KEY, this.isSuper ? '1' : '0')
+      setSessionItem(ROLES_KEY, JSON.stringify(this.roles))
+      setSessionItem(PERMISSIONS_KEY, JSON.stringify(this.permissions))
     },
 
     hasPermission(permission?: string) {
@@ -185,14 +186,14 @@ export const useAdminAuthStore = defineStore('adminAuth', {
       this.roles = []
       this.permissions = []
       this.permissionsLoaded = false
-      localStorage.removeItem(IS_SUPER_KEY)
-      localStorage.removeItem(ROLES_KEY)
-      localStorage.removeItem(PERMISSIONS_KEY)
+      removeSessionItem(IS_SUPER_KEY)
+      removeSessionItem(ROLES_KEY)
+      removeSessionItem(PERMISSIONS_KEY)
     },
 
     logout() {
       this.token = ''
-      localStorage.removeItem(TOKEN_KEY)
+      removeSessionItem(TOKEN_KEY)
       this.clearAuthzCache()
       // 重置合规声明 store，避免下次登录时残留旧状态
       // 动态 import 防止模块加载期循环依赖
