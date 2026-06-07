@@ -15,11 +15,11 @@ const cfAsyncModuleScriptPlugin = () => ({
 const adminBaseInjector = () => ({
   name: 'inject-admin-base-placeholder',
   transformIndexHtml(html: string) {
-    // 在 <head> 开标签后立即插入 <base>。占位符 __DJ_ADMIN_BASE__
+    // 在 <head> 开标签后立即插入 <base>。占位符 __NEXACARD_ADMIN_BASE__
     // 由后端 internal/web 包在启动时一次性替换为实际 admin path。
     return html.replace(
       /<head[^>]*>/,
-      (m) => `${m}\n    <base href="__DJ_ADMIN_BASE__/">`,
+      (m) => `${m}\n    <base href="__NEXACARD_ADMIN_BASE__/">`,
     )
   },
 })
@@ -40,11 +40,11 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:5175',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:5175',
         changeOrigin: true,
       },
     },
