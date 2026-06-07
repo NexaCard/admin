@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api/admin'
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { formatDate } from '@/utils/format'
 import { Bot, ExternalLink, Wifi, WifiOff, RefreshCw, Send, KeyRound, ShieldAlert } from 'lucide-vue-next'
 
-const LICENSE_PURCHASE_URL = 'https://dujiao-next.com/services/telegram-bot'
+const LICENSE_PURCHASE_URL = 'https://github.com/NexaCard/docs'
 
 const { t } = useI18n()
 

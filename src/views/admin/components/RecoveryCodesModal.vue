@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
@@ -28,7 +28,7 @@ const downloadTxt = () => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'dujiao-2fa-recovery-codes.txt'
+  a.download = 'nexacard-2fa-recovery-codes.txt'
   a.click()
   URL.revokeObjectURL(url)
 }
