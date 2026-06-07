@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDebounceFn } from '@vueuse/core'
@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { formatDate, getLocalizedText } from '@/utils/format'
 import { confirmAction } from '@/utils/confirm'
 import { notifyError, notifySuccess } from '@/utils/notify'
+import { copyText } from '@/utils/clipboard'
 import CardSecretEditModal from './components/CardSecretEditModal.vue'
 
 const { t } = useI18n()
@@ -71,6 +72,8 @@ const batchActionSuccess = ref('')
 const showEditModal = ref(false)
 const editingCardSecret = ref<AdminCardSecret | null>(null)
 const revealedSecretIds = ref<number[]>([])
+const revealTimeoutMs = 30000
+const revealTimers = new Map<number, ReturnType<typeof window.setTimeout>>()
 
 const normalizeFilterValue = (value: string) => (value === '__all__' ? '' : value)
 
@@ -223,21 +226,52 @@ const maskSecretValue = (value: string | null | undefined) => {
 
 const isSecretRevealed = (id: number) => revealedSecretIds.value.includes(Number(id || 0))
 
+const clearSecretTimer = (id: number) => {
+  const timer = revealTimers.get(id)
+  if (timer) {
+    window.clearTimeout(timer)
+    revealTimers.delete(id)
+  }
+}
+
+const hideSecret = (id: number) => {
+  const normalized = Number(id || 0)
+  if (!normalized) return
+  clearSecretTimer(normalized)
+  revealedSecretIds.value = revealedSecretIds.value.filter((item) => item !== normalized)
+}
+
+const hideAllRevealedSecrets = () => {
+  revealTimers.forEach((timer) => window.clearTimeout(timer))
+  revealTimers.clear()
+  revealedSecretIds.value = []
+}
+
+const scheduleSecretAutoHide = (id: number) => {
+  clearSecretTimer(id)
+  revealTimers.set(id, window.setTimeout(() => hideSecret(id), revealTimeoutMs))
+}
+
 const toggleSecretReveal = (id: number) => {
   const normalized = Number(id || 0)
   if (!normalized) return
   if (isSecretRevealed(normalized)) {
-    revealedSecretIds.value = revealedSecretIds.value.filter((item) => item !== normalized)
+    hideSecret(normalized)
     return
   }
   revealedSecretIds.value = [...revealedSecretIds.value, normalized]
+  scheduleSecretAutoHide(normalized)
 }
 
-const copySecretValue = async (value: string | null | undefined) => {
-  const text = String(value || '')
+const copySecretValue = async (secret: AdminCardSecret) => {
+  if (!isSecretRevealed(secret.id)) {
+    notifyError(t('admin.common.revealSecretBeforeCopy'))
+    return
+  }
+  const text = String(secret.secret || '')
   if (!text) return
   try {
-    await navigator.clipboard.writeText(text)
+    await copyText(text)
     notifySuccess(t('admin.common.copied'))
   } catch {
     notifyError(t('admin.common.copyFailed'))
@@ -469,6 +503,7 @@ const fetchBatches = async (page = 1, options: ListFetchOptions = {}) => {
 
 const fetchCardSecrets = async (page = 1, options: ListFetchOptions = {}) => {
   if (!options.preserveRows) cardSecretsLoading.value = true
+  hideAllRevealedSecrets()
   try {
     const response = await adminAPI.getCardSecrets({
       ...currentQueryFilter.value,
@@ -763,6 +798,10 @@ const secretSkuLabel = (secret: AdminCardSecret) => resolveSkuLabelById(Number(s
 onMounted(async () => {
   await loadProductOptions()
   await fetchCardSecrets(1)
+})
+
+onBeforeUnmount(() => {
+  hideAllRevealedSecrets()
 })
 </script>
 
@@ -1143,11 +1182,25 @@ onMounted(async () => {
                     <code class="min-w-0 flex-1 truncate rounded bg-muted px-2 py-1 font-mono text-xs text-muted-foreground">
                       {{ isSecretRevealed(secret.id) ? secret.secret : maskSecretValue(secret.secret) }}
                     </code>
-                    <Button size="sm" variant="ghost" class="h-7 w-7 shrink-0 p-0" @click="toggleSecretReveal(secret.id)">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      class="h-7 w-7 shrink-0 p-0"
+                      :title="isSecretRevealed(secret.id) ? t('admin.common.hideSecret') : t('admin.common.showSecret')"
+                      :aria-label="isSecretRevealed(secret.id) ? t('admin.common.hideSecret') : t('admin.common.showSecret')"
+                      @click="toggleSecretReveal(secret.id)"
+                    >
                       <EyeOff v-if="isSecretRevealed(secret.id)" class="h-3.5 w-3.5" />
                       <Eye v-else class="h-3.5 w-3.5" />
                     </Button>
-                    <Button size="sm" variant="ghost" class="h-7 w-7 shrink-0 p-0" @click="copySecretValue(secret.secret)">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      class="h-7 w-7 shrink-0 p-0"
+                      :title="t('admin.common.copy')"
+                      :aria-label="t('admin.common.copy')"
+                      @click="copySecretValue(secret)"
+                    >
                       <Copy class="h-3.5 w-3.5" />
                     </Button>
                   </div>

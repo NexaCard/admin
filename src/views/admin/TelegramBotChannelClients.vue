@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api/admin'
 import { Card, CardContent } from '@/components/ui/card'
@@ -25,6 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { notifySuccess, notifyError } from '@/utils/notify'
+import { copyText } from '@/utils/clipboard'
 import { Plus, Copy, Eye, EyeOff, Loader2, RotateCcw, Trash2, Pencil } from 'lucide-vue-next'
 
 const { t } = useI18n()
@@ -49,6 +50,8 @@ const clients = ref<ChannelClient[]>([])
 const showCreateDialog = ref(false)
 const creating = ref(false)
 const revealedSecretIds = ref<number[]>([])
+const revealTimeoutMs = 30000
+const revealTimers = new Map<number, ReturnType<typeof window.setTimeout>>()
 
 // Edit dialog
 const showEditDialog = ref(false)
@@ -76,6 +79,7 @@ const createForm = ref({
 
 const fetchClients = async () => {
   loading.value = true
+  hideAllRevealedSecrets()
   try {
     const res = await adminAPI.getChannelClients()
     const data = res.data?.data
@@ -182,12 +186,14 @@ const handleConfirmAction = async () => {
   }
 }
 
-const copyToClipboard = async (text: string) => {
+const copyToClipboard = async (text: string | null | undefined) => {
+  const value = String(text || '')
+  if (!value) return
   try {
-    await navigator.clipboard.writeText(text)
+    await copyText(value)
     notifySuccess(t('telegramBot.channelClients.copied'))
   } catch {
-    // fallback
+    notifyError(t('admin.common.copyFailed'))
   }
 }
 
@@ -200,18 +206,57 @@ const maskSecretValue = (value: string) => {
 
 const isSecretRevealed = (id: number) => revealedSecretIds.value.includes(Number(id || 0))
 
+const clearSecretTimer = (id: number) => {
+  const timer = revealTimers.get(id)
+  if (timer) {
+    window.clearTimeout(timer)
+    revealTimers.delete(id)
+  }
+}
+
+const hideSecret = (id: number) => {
+  const normalized = Number(id || 0)
+  if (!normalized) return
+  clearSecretTimer(normalized)
+  revealedSecretIds.value = revealedSecretIds.value.filter((item) => item !== normalized)
+}
+
+const hideAllRevealedSecrets = () => {
+  revealTimers.forEach((timer) => window.clearTimeout(timer))
+  revealTimers.clear()
+  revealedSecretIds.value = []
+}
+
+const scheduleSecretAutoHide = (id: number) => {
+  clearSecretTimer(id)
+  revealTimers.set(id, window.setTimeout(() => hideSecret(id), revealTimeoutMs))
+}
+
 const toggleSecretReveal = (id: number) => {
   const normalized = Number(id || 0)
   if (!normalized) return
   if (isSecretRevealed(normalized)) {
-    revealedSecretIds.value = revealedSecretIds.value.filter((item) => item !== normalized)
+    hideSecret(normalized)
     return
   }
   revealedSecretIds.value = [...revealedSecretIds.value, normalized]
+  scheduleSecretAutoHide(normalized)
+}
+
+const copyChannelSecret = async (client: ChannelClient) => {
+  if (!isSecretRevealed(client.id)) {
+    notifyError(t('admin.common.revealSecretBeforeCopy'))
+    return
+  }
+  await copyToClipboard(client.channel_secret)
 }
 
 onMounted(() => {
   fetchClients()
+})
+
+onBeforeUnmount(() => {
+  hideAllRevealedSecrets()
 })
 </script>
 
@@ -265,7 +310,14 @@ onMounted(() => {
               <TableCell class="min-w-[160px]">
                 <div class="flex items-center gap-1">
                   <code class="block max-w-[180px] break-all rounded bg-muted px-1.5 py-0.5 text-xs">{{ client.channel_key }}</code>
-                  <Button variant="ghost" size="sm" class="h-6 w-6 p-0 shrink-0" @click="copyToClipboard(client.channel_key)">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    class="h-6 w-6 p-0 shrink-0"
+                    :title="t('admin.common.copy')"
+                    :aria-label="t('admin.common.copy')"
+                    @click="copyToClipboard(client.channel_key)"
+                  >
                     <Copy class="h-3 w-3" />
                   </Button>
                 </div>
@@ -273,11 +325,25 @@ onMounted(() => {
               <TableCell class="min-w-[160px]">
                 <div class="flex items-center gap-1">
                   <code class="block max-w-[180px] truncate rounded bg-muted px-1.5 py-0.5 text-xs">{{ isSecretRevealed(client.id) ? client.channel_secret : maskSecretValue(client.channel_secret) }}</code>
-                  <Button variant="ghost" size="sm" class="h-6 w-6 p-0 shrink-0" @click="toggleSecretReveal(client.id)">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    class="h-6 w-6 p-0 shrink-0"
+                    :title="isSecretRevealed(client.id) ? t('admin.common.hideSecret') : t('admin.common.showSecret')"
+                    :aria-label="isSecretRevealed(client.id) ? t('admin.common.hideSecret') : t('admin.common.showSecret')"
+                    @click="toggleSecretReveal(client.id)"
+                  >
                     <EyeOff v-if="isSecretRevealed(client.id)" class="h-3 w-3" />
                     <Eye v-else class="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="sm" class="h-6 w-6 p-0 shrink-0" @click="copyToClipboard(client.channel_secret)">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    class="h-6 w-6 p-0 shrink-0"
+                    :title="t('admin.common.copy')"
+                    :aria-label="t('admin.common.copy')"
+                    @click="copyChannelSecret(client)"
+                  >
                     <Copy class="h-3 w-3" />
                   </Button>
                 </div>
@@ -291,7 +357,14 @@ onMounted(() => {
               <TableCell class="min-w-[180px]">
                 <div v-if="client.callback_url" class="flex items-center gap-1">
                   <code class="block max-w-[220px] break-all rounded bg-muted px-1.5 py-0.5 text-xs">{{ client.callback_url }}</code>
-                  <Button variant="ghost" size="sm" class="h-6 w-6 p-0 shrink-0" @click="copyToClipboard(client.callback_url)">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    class="h-6 w-6 p-0 shrink-0"
+                    :title="t('admin.common.copy')"
+                    :aria-label="t('admin.common.copy')"
+                    @click="copyToClipboard(client.callback_url)"
+                  >
                     <Copy class="h-3 w-3" />
                   </Button>
                 </div>
